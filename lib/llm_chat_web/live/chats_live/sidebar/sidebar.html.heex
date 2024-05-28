@@ -1,0 +1,17 @@
+<div
+  id="sidebar"
+  class={"bg-base-200 w-80 flex-shrink-0 overflow-x-hidden transition-all duration-300 #{if @sidebar_open, do: "", else: "hidden"}"}
+  phx-hook="SidebarToggle"
+>
+  <div class="h-full w-80">
+    <div class="flex h-full min-h-0 flex-col">
+      <div class="relative h-full w-full flex-1 items-start">
+        <h2 class="sr-only">Chat history</h2>
+        <nav class="flex h-full w-full flex-col px-3 pb-3" aria-label="Chat history">
+          <.sb_header />
+          <.chat_history periods={@periods} />
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>

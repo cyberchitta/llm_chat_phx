@@ -1,0 +1,17 @@
+{
+    "name": "LLM Chat",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "web",
+    "workspaceFolder": "/llm_chat_phx",
+    "shutdownAction": "stopCompose",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "jakebecker.elixir-ls",
+                "eamodio.gitlens",
+                "github.vscode-pull-request-github",
+                "esbenp.prettier-vscode"
+            ]
+        }
+    }
+}

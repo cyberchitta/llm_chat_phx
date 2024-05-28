@@ -1,0 +1,23 @@
+<main class="relative h-full w-full flex-1 overflow-auto transition-width">
+  <div role="presentation" tabindex="0" class="flex h-full flex-col">
+    <div class="flex-1 overflow-hidden">
+      <div class="relative h-full">
+        <div id="messageContainer" phx-hook="ChatAutoScroll" class="h-full overflow-y-auto">
+          <.header main={@main} user={@user} sidebar_open={@sidebar_open} />
+          <%= if get_in(@main, [:chat]) do %>
+            <.messages messages={@main.messages} uistate={@main.uistate} />
+          <% else %>
+            <.hello suggestions={@main.suggestions} />
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <div class="w-full pt-2 md:pt-0 md:border-transparent md:dark:border-transparent md:w-[calc(100%-.5rem)]">
+      <.input main={@main} />
+      <div class="relative px-2 py-2 text-center text-xs text-base-content/70 md:px-60">
+        <span>LLMs can make mistakes. Consider checking important information.</span>
+      </div>
+    </div>
+  </div>
+  <.help />
+</main>

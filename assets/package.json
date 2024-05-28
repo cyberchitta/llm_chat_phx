@@ -1,0 +1,27 @@
+{
+  "name": "llm_chat-chat-ex",
+  "version": ".0.0",
+  "description": "",
+  "main": "tailwind.config.js",
+  "dependencies": {
+    "camelcase-css": "^2.0.1",
+    "css-selector-tokenizer": "^0.8.0",
+    "cssesc": "^3.0.0",
+    "culori": "^3.3.0",
+    "fastparse": "^1.1.2",
+    "nanoid": "^3.3.7",
+    "picocolors": "^1.0.0",
+    "postcss": "^8.4.35",
+    "postcss-js": "^4.0.1",
+    "source-map-js": "^1.0.2"
+  },
+  "devDependencies": {
+    "daisyui": "^4.7.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

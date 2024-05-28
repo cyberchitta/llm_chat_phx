@@ -1,0 +1,29 @@
+<%= if @message.role == "assistant" do %>
+  <div class="mt-1 flex gap-3">
+    <span data-state="closed">
+      <button class="flex items-center gap-1.5 rounded-md p-1 text-xs text-base-content/70 hover:text-base-content md:invisible group-hover:visible">
+        <.icon name="hero-clipboard" class="w-4 h-4" />
+      </button>
+    </span>
+    <span data-state="closed">
+      <button class="p-1 rounded-md text-base-content/70 hover:text-base-content md:invisible group-hover:visible">
+        <div class="flex items-center gap-1.5 text-xs">
+          <.icon name="hero-hand-thumb-up" class="w-4 h-4" />
+        </div>
+      </button>
+    </span>
+    <span data-state="closed">
+      <button class="p-1 rounded-md text-base-content/70 hover:text-base-content md:invisible group-hover:visible">
+        <.icon name="hero-hand-thumb-down" class="w-4 h-4" />
+      </button>
+    </span>
+  </div>
+<% else %>
+  <div class="mt-1 flex gap-3">
+    <button class="p-1 rounded-md text-base-content/70 hover:text-base-content md:invisible group-hover:visible">
+      <div class="flex items-center gap-1.5 text-xs">
+        <.icon name="hero-pencil" class="w-4 h-4" />
+      </div>
+    </button>
+  </div>
+<% end %>

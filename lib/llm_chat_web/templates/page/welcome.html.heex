@@ -1,0 +1,23 @@
+<div class="hero min-h-screen bg-base-200">
+  <div class="hero-content flex-col lg:flex-row-reverse">
+    <div class="text-center lg:text-left">
+      <h1 class="text-5xl font-bold">
+        Welcome, <%= @user.name %>!
+      </h1>
+      <p class="py-6">
+        You are <strong>signed in</strong> with your <strong>Google Account</strong> <br />
+        <strong class="text-primary"><%= @user.email %></strong>
+      </p>
+      <.link href={~p"/chats"} class="btn btn-primary">Start Chatting</.link>
+    </div>
+    <div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
+      <div class="card-body">
+        <div class="avatar">
+          <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+            <img src={"#{@user.avatar_url}"} alt="User Avatar" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

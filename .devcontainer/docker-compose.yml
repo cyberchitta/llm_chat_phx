@@ -1,0 +1,41 @@
+services:
+  web:
+    build:
+      context: ../
+      dockerfile: ./.devcontainer/Dockerfile
+    command: sleep infinity
+    volumes:
+      - ..:/llm_chat_phx:cached
+    ports:
+      - 4000:4000
+      - 4001:4001
+
+  db:
+    env_file: ../envs/.dev.local.env
+    image: postgres:15-alpine
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
+    volumes:
+      - database:/var/lib/postgresql/data
+
+#  scylladb:
+#    image: scylladb/scylla:5.4
+#    ports:
+#      - 9042:9042
+#    command:
+#      - "--smp"
+#      - "1"
+#    healthcheck:
+#      test: [ "CMD-SHELL", "nodetool -h ::FFFF:127.0.0.1 status" ]
+#      interval: 20s
+#      timeout: 10s
+#      retries: 12
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: 50m
+
+volumes:
+  database:
