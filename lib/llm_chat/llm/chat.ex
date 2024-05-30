@@ -38,7 +38,7 @@ defmodule LlmChat.Llm.Chat do
   defp content_stream(base_stream) do
     base_stream
     |> Stream.flat_map(& &1)
-    |> Stream.map(fn %{data: d} -> d |> Map.get("choices") |> Enum.at(0) |> Map.get("delta") end)
+    |> Stream.map(fn %{data: d} -> d |> Map.get("choices") |> List.first() |> Map.get("delta") end)
     |> Stream.filter(fn map -> map |> Map.has_key?("content") end)
     |> Stream.map(fn map -> map |> Map.get("content") end)
   end
