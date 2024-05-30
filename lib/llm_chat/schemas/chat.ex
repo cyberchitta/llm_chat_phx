@@ -16,7 +16,7 @@ defmodule LlmChat.Schemas.Chat do
 
   def changeset(chat, attrs) do
     chat
-    |> cast(attrs, [:name, :description, :user_id])
+    |> cast(attrs, [:name, :user_id])
     |> validate_required([:name, :user_id])
     |> assoc_constraint(:user)
   end
