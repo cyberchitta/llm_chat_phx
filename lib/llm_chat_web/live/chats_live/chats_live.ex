@@ -33,6 +33,21 @@ defmodule LlmChatWeb.ChatsLive do
     {:noreply, update(socket, :sidebar_open, fn sidebar_open -> !sidebar_open end)}
   end
 
+  def handle_event("rename_chat", %{"id" => chat_id, "new_name" => new_name}, socket) do
+    Chat.rename(chat_id, new_name)
+    {:noreply, assign(socket, :sidebar, UiState.sidebar(socket.assigns.user_email))}
+  end
+
+  def handle_event("delete_chat", %{"id" => chat_id}, socket) do
+    Chat.delete(chat_id)
+
+    if socket.assigns.main.chat.id == chat_id do
+      {:noreply, socket |> push_navigate(to: ~p"/chats")}
+    else
+      {:noreply, assign(socket, :sidebar, UiState.sidebar(socket.assigns.user_email))}
+    end
+  end
+
   def handle_event("submit", %{"prompt-textarea" => prompt}, socket) do
     if Map.get(socket.assigns.main, :chat) do
       handle_submit_existing_chat(prompt, socket)

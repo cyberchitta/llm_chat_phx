@@ -8,6 +8,7 @@
         <li class="relative z-10" style="opacity: 1; height: auto;">
           <div class="group relative flex items-center justify-between rounded-lg active:opacity-90 bg-base-300 p-2">
             <.link
+              id={"chat-name-#{chat.id}" }
               href={~p"/chats/#{chat.id}"}
               class="flex-grow overflow-hidden whitespace-nowrap"
             >
@@ -22,6 +23,7 @@
               aria-haspopup="menu"
               aria-expanded="false"
               data-state="closed"
+              data-chat-id={chat.id}
               phx-hook="ChatItemMenu"
             >
               <.icon name="hero-ellipsis-horizontal" class="w-4 h-4" />

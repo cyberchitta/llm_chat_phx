@@ -24,5 +24,38 @@ export default {
     menu.addEventListener("click", (event) => {
       event.stopPropagation();
     });
+    document.querySelector("#share-chat").addEventListener("click", () => {
+      menu.classList.add("hidden");
+    });
+    document.querySelector("#rename-chat").addEventListener("click", () => {
+      const chatId = this.el.getAttribute("data-chat-id");
+      const chatNameElement = document.querySelector(`#chat-name-${chatId}`);
+      if (chatNameElement) {
+        chatNameElement.innerHTML = `<input type="text" id="rename-input" value="${chatNameElement.textContent.trim()}" class="input input-bordered input-sm w-full max-w-xs" />`;
+        const inputElement = document.querySelector("#rename-input");
+        inputElement.focus();
+        const finishRename = () => {
+          this.pushEventTo(this.el, "rename_chat", {
+            id: chatId,
+            new_name: inputElement.value,
+          });
+          inputElement.removeEventListener("blur", finishRename);
+          inputElement.removeEventListener("keypress", handleKeyPress);
+        };
+        const handleKeyPress = (event) => {
+          if (event.key === "Enter") {
+            inputElement.blur();
+          }
+        };
+        inputElement.addEventListener("blur", finishRename);
+        inputElement.addEventListener("keypress", handleKeyPress);
+      }
+      menu.classList.add("hidden");
+    });
+    document.querySelector("#delete-chat").addEventListener("click", () => {
+      const chatId = this.el.getAttribute("data-chat-id");
+      this.pushEventTo(this.el, "delete_chat", { id: chatId });
+      menu.classList.add("hidden");
+    });
   },
 };
