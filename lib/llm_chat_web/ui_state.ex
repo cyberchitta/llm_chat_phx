@@ -46,6 +46,6 @@ defmodule LlmChatWeb.UiState do
   def with_chunk(streaming, chunk) do
     assistant = streaming.assistant
     content = assistant.content
-    %{streaming | assistant: %{assistant | content: content <> " " <> chunk}}
+    %{streaming | assistant: %{assistant | content: content <> chunk}}
   end
 end
