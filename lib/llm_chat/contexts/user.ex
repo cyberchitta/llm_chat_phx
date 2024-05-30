@@ -9,13 +9,6 @@ defmodule LlmChat.Contexts.User do
     User |> get_by(email: user_email)
   end
 
-  def validate(user_email) do
-    case get_by_email(user_email) do
-      nil -> {:error}
-      user -> {:ok, user}
-    end
-  end
-
   def list_chats(user_id) do
     from(c in Chat,
       where: c.user_id == ^user_id,

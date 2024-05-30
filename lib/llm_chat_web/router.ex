@@ -27,7 +27,7 @@ defmodule LlmChatWeb.Router do
   end
 
   scope "/", LlmChatWeb do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser, :validate_user_session, :require_authenticated_user]
 
     get "/logout", GauthController, :logout
 

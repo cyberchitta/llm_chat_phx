@@ -6,33 +6,28 @@
     <ol>
       <%= for chat <- period.chats do %>
         <li class="relative z-10" style="opacity: 1; height: auto;">
-          <div class="group relative rounded-lg active:opacity-90 bg-base-300">
-            <.link href={~p"/chats/#{chat.id}"} class="flex items-center gap-2 p-2">
-              <div class="relative grow overflow-hidden whitespace-nowrap">
-                <%= chat.name %>
-                <div class="absolute bottom-0 right-0 top-0 bg-gradient-to-l from-base-300 w-20 from-60%">
-                </div>
+          <div class="group relative flex items-center justify-between rounded-lg active:opacity-90 bg-base-300 p-2">
+            <.link
+              id={"chat-name-#{chat.id}" }
+              href={~p"/chats/#{chat.id}"}
+              class="flex-grow overflow-hidden whitespace-nowrap"
+            >
+              <%= chat.name %>
+              <div class="absolute bottom-0 right-0 top-0 bg-gradient-to-l from-base-300 w-20 from-60%">
               </div>
             </.link>
-            <div class="absolute bottom-0 right-0 top-0 items-center gap-1.5 pr-2 flex">
-              <button
-                class="flex items-center justify-center text-base-content/70 hover:text-base-content/50"
-                type="button"
-                id={"radix-:r#{chat.id}:"}
-                aria-haspopup="menu"
-                aria-expanded="false"
-                data-state="closed"
-              >
-                <span data-state="closed">
-                  <!-- SVG icon for options -->
-                </span>
-              </button>
-              <span data-state="closed">
-                <button class="flex items-center justify-center text-base-content/70 hover:text-base-content/50">
-                  <!-- SVG icon for archiving -->
-                </button>
-              </span>
-            </div>
+            <button
+              class="btn btn-ghost btn-sm flex items-center justify-center"
+              type="button"
+              id="radix-:r117:"
+              aria-haspopup="menu"
+              aria-expanded="false"
+              data-state="closed"
+              data-chat-id={chat.id}
+              phx-hook="ChatItemMenu"
+            >
+              <.icon name="hero-ellipsis-horizontal" class="w-4 h-4" />
+            </button>
           </div>
         </li>
       <% end %>

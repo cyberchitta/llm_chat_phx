@@ -2,17 +2,22 @@ defmodule LlmChat.Contexts.Chat do
   @moduledoc false
   import Ecto.Query
   import LlmChat.RepoPostgres
+  alias LlmChat.RepoPostgres
   alias LlmChat.Schemas.{Chat, Message, User}
 
   def create(attrs) do
     %Chat{} |> Chat.changeset(attrs) |> insert!()
   end
 
-  def validate(chat_id) do
-    case Chat |> get(chat_id) do
-      nil -> {:error}
-      chat -> {:ok, chat}
-    end
+  def rename(chat_id, new_name) do
+    Chat
+    |> RepoPostgres.get!(chat_id)
+    |> Chat.changeset(%{name: new_name})
+    |> RepoPostgres.update!()
+  end
+
+  def delete(chat_id) do
+    Chat |> RepoPostgres.get!(chat_id) |> RepoPostgres.delete!()
   end
 
   def touch(chat_id) do

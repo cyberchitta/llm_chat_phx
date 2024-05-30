@@ -11,13 +11,39 @@ defmodule LlmChatWeb.UserGauth do
     LlmChatWeb.Endpoint.url() |> ElixirAuthGoogle.generate_oauth_url()
   end
 
-  def log_in_user(conn, user, _params \\ %{}) do
-    conn |> renew_session() |> put_token_in_session(user.email)
+  @session_error "You must be logged in with a current session to access this page."
+
+  defp login_url(), do: ~p"/gauth"
+
+  def fetch_current_user(conn, _opts) do
+    user_email = get_session(conn, :user_email)
+    conn |> assign(:user_email, user_email)
   end
 
-  defp renew_session(conn) do
-    delete_csrf_token()
-    conn |> configure_session(renew: true) |> clear_session()
+  def validate_user_session(conn, _opts) do
+    user_email = get_session(conn, :user_email)
+    expiration = get_session(conn, :gauth_expiration)
+
+    if is_nil(expiration) || DateTime.now!("Etc/UTC") |> DateTime.compare(expiration) == :gt do
+      conn |> plug_force_login()
+    else
+      user = User.get_by_email(user_email)
+      if is_nil(user), do: conn |> plug_force_login(), else: conn |> assign(:user, user)
+    end
+  end
+
+  def redirect_if_user_is_authenticated(conn, _opts) do
+    if conn.assigns[:user_email],
+      do: conn |> redirect(to: signed_in_path(conn)) |> halt(),
+      else: conn
+  end
+
+  def require_authenticated_user(conn, _opts) do
+    if conn.assigns[:user_email], do: conn, else: conn |> plug_force_login()
+  end
+
+  def log_in_user(conn, user, oauth_expiration) do
+    conn |> renew_session() |> start_session(user.email, oauth_expiration)
   end
 
   def log_out_user(conn) do
@@ -26,11 +52,6 @@ defmodule LlmChatWeb.UserGauth do
     end
 
     conn |> renew_session() |> redirect(to: ~p"/")
-  end
-
-  def fetch_current_user(conn, _opts) do
-    user_email = get_session(conn, :user_email)
-    conn |> assign(:user_email, user_email)
   end
 
   def on_mount(:mount_user, _params, session, socket) do
@@ -43,12 +64,10 @@ defmodule LlmChatWeb.UserGauth do
     if socket.assigns[:user_email] do
       {:cont, socket}
     else
-      s =
-        socket
-        |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
-        |> Phoenix.LiveView.redirect(to: ~p"/gauth")
-
-      {:halt, s}
+      {:halt,
+       socket
+       |> Phoenix.LiveView.put_flash(:error, @session_error)
+       |> Phoenix.LiveView.redirect(to: login_url())}
     end
   end
 
@@ -74,31 +93,24 @@ defmodule LlmChatWeb.UserGauth do
     end)
   end
 
-  def redirect_if_user_is_authenticated(conn, _opts) do
-    if conn.assigns[:user_email] do
-      conn
-      |> redirect(to: signed_in_path(conn))
-      |> halt()
-    else
-      conn
-    end
+  defp plug_force_login(conn) do
+    conn
+    |> put_flash(:error, @session_error)
+    |> renew_session()
+    |> maybe_store_return_to()
+    |> redirect(to: login_url())
+    |> halt()
   end
 
-  def require_authenticated_user(conn, _opts) do
-    if conn.assigns[:user_email] do
-      conn
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/gauth")
-      |> halt()
-    end
+  defp renew_session(conn) do
+    delete_csrf_token()
+    conn |> configure_session(renew: true) |> clear_session()
   end
 
-  defp put_token_in_session(conn, token) do
+  defp start_session(conn, token, gauth_expiration) do
     conn
     |> put_session(:user_email, token)
+    |> put_session(:gauth_expiration, gauth_expiration)
     |> put_session(:live_socket_id, "users_sessions:#{Base.url_encode64(token)}")
   end
 
