@@ -1,7 +1,6 @@
 <div
   id="sidebar"
   class={"bg-base-200 w-80 flex-shrink-0 overflow-x-hidden transition-all duration-300 #{if @sidebar_open, do: "", else: "hidden"}"}
-  phx-hook="SidebarToggle"
 >
   <div class="h-full w-80">
     <div class="flex h-full min-h-0 flex-col">
@@ -12,6 +11,37 @@
           <.chat_history periods={@periods} />
         </nav>
       </div>
+    </div>
+  </div>
+</div>
+<div id="chat-item-menu" class="hidden fixed z-50">
+  <div class="max-w-xs rounded-lg bg-base-200 shadow-lg border border-base-300" tabindex="-1">
+    <div
+      role="menuitem"
+      class="flex items-center m-1.5 p-2.5 text-sm cursor-pointer group hover:bg-base-300 rounded-md"
+      tabindex="-1"
+    >
+      <div class="flex items-center justify-center h-5 w-5">
+        <.icon name="hero-arrow-up-tray" class="h-4 w-4" />
+      </div>Share
+    </div>
+    <div
+      role="menuitem"
+      class="flex items-center m-1.5 p-2.5 text-sm cursor-pointer group hover:bg-base-300 rounded-md"
+      tabindex="-1"
+    >
+      <div class="flex items-center justify-center h-5 w-5">
+        <.icon name="hero-pencil" class="h-4 w-4" />
+      </div>Rename
+    </div>
+    <div
+      role="menuitem"
+      class="flex items-center m-1.5 p-2.5 text-sm cursor-pointer group hover:bg-base-300 rounded-md text-error"
+      tabindex="-1"
+    >
+      <div class="flex items-center justify-center h-5 w-5 text-error">
+        <.icon name="hero-trash" class="h-4 w-4" />
+      </div>Delete
     </div>
   </div>
 </div>

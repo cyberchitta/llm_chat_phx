@@ -25,12 +25,14 @@ import topbar from "../vendor/topbar";
 import TextAreaAutosize from "./text_area_autosize";
 import ChatAutoScroll from "./chat_auto_scroll";
 import SidebarToggle from "./sidebar_toggle";
+import ChatItemMenu from "./chat_item_menu";
 
 let Hooks = {};
 
 Hooks.TextAreaAutosize = TextAreaAutosize;
 Hooks.ChatAutoScroll = ChatAutoScroll;
 Hooks.SidebarToggle = SidebarToggle;
+Hooks.ChatItemMenu = ChatItemMenu;
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
