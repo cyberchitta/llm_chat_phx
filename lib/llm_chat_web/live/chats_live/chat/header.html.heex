@@ -1,9 +1,7 @@
-<div class="absolute left-0 right-0">
-  <div class="sticky top-0 juice:p-3 mb-1.5 flex items-center justify-between z-10 h-14 p-2 font-semibold bg-base-100">
-    <div class="absolute left-1/2 -translate-x-1/2"></div>
-    <div class="flex items-center gap-2 overflow-hidden juice:gap-0">
-      <div class="flex items-center">
-        <%= if not @sidebar_open do %>
+<header class="bg-base-100 shadow-md p-3">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <%= if not @sidebar_open do %>
           <span class="" data-state="closed">
             <button
               class="h-10 rounded-lg px-2.5 text-base-content/70 focus-visible:outline-0 hover:bg-base-200 focus-visible:bg-base-200"
@@ -17,58 +15,35 @@
               <.icon name="hero-pencil-square" class="w-6 h-6" />
             </button>
           </span>
-        <% end %>
-      </div>
-      <div
-        type="button"
-        id="radix-:r70:"
-        aria-haspopup="menu"
-        aria-expanded="false"
-        data-state="closed"
-        class="group flex cursor-pointer items-center gap-1 rounded-xl py-2 px-3 text-lg font-semibold hover:bg-base-200 radix-state-open:bg-base-200 juice:text-base-content/70 juice:rounded-lg juice:py-1.5 overflow-hidden whitespace-nowrap"
-      >
-        <div class="juice:text-base-content/70">
-          ChatGPT <span class="text-base-content/70">4o</span>
-        </div>
+                <% end %>
+      <div class="flex items-center cursor-pointer rounded-xl py-2 px-3 text-lg font-semibold hover:bg-base-200">
+        ChatGPT <span class="text-base-content/70">4o</span>
         <.icon name="hero-chevron-down" class="w-6 h-6 text-base-content/50" />
       </div>
     </div>
-    <div class="flex gap-2 pr-1">
+    <div class="flex gap-2">
       <%= if get_in(@main, [:chat]) do %>
-        <span class="" data-state="closed">
-          <button class="h-10 rounded-lg px-2.5 text-base-content/70 focus-visible:outline-0 hover:bg-base-200 focus-visible:bg-base-200">
-            <.icon name="hero-arrow-up-on-square" class="w-6 h-6" />
-          </button>
-        </span>
+        <button class="h-10 rounded-lg px-2.5 text-base-content/70 hover:bg-base-200 focus:bg-base-200">
+          <.icon name="hero-arrow-up-on-square" class="w-6 h-6" />
+        </button>
       <% end %>
       <%= if @user do %>
         <button
-          data-testid="fruit-juice-profile"
-          class="flex h-10 w-10 items-center justify-center rounded-full hover:bg-base-200 focus-visible:bg-base-200 focus-visible:outline-0"
+          class="flex h-10 w-10 items-center justify-center rounded-full hover:bg-base-200 focus:bg-base-200"
           type="button"
-          id="radix-:r72:"
-          aria-haspopup="menu"
-          aria-expanded="false"
-          data-state="closed"
         >
-          <div class="flex items-center justify-center overflow-hidden rounded-full">
-            <div class="relative flex">
-              <img
-                alt="User"
-                referrerpolicy="no-referrer"
-                loading="lazy"
-                width="32"
-                height="32"
-                decoding="async"
-                data-nimg="1"
-                class="rounded-sm"
-                src={"#{@user.avatar_url}"}
-                style="color: transparent;"
-              />
-            </div>
-          </div>
+          <img
+            alt="User"
+            referrerpolicy="no-referrer"
+            loading="lazy"
+            width="32"
+            height="32"
+            decoding="async"
+            class="rounded-full"
+            src={"#{@user.avatar_url}"}
+          />
         </button>
       <% end %>
     </div>
   </div>
-</div>
+</header>
