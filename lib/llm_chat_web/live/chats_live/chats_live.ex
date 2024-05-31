@@ -33,6 +33,14 @@ defmodule LlmChatWeb.ChatsLive do
     {:noreply, update(socket, :sidebar_open, fn sidebar_open -> !sidebar_open end)}
   end
 
+  def handle_event("to_index", _, socket) do
+    if socket.assigns.live_action != :index do
+      {:noreply, push_navigate(socket, to: ~p"/chats")}
+    else
+      {:noreply, socket}
+    end
+  end
+
   def handle_event("rename_chat", %{"id" => chat_id, "new_name" => new_name}, socket) do
     Chat.rename(chat_id, new_name)
     {:noreply, assign(socket, :sidebar, UiState.sidebar(socket.assigns.user_email))}
@@ -104,8 +112,7 @@ defmodule LlmChatWeb.ChatsLive do
 
   defp handle_submit_new_chat(prompt, socket) do
     user = socket.assigns.user
-    chat = Chat.create(%{name: "NewChat", description: "Unnamed", user_id: user.id})
-
+    chat = Chat.create(%{name: "NewChat", user_id: user.id})
     {:noreply, socket |> push_navigate(to: ~p"/chats/#{chat.id}?prompt=#{URI.encode(prompt)}")}
   end
 
