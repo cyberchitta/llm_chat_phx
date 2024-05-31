@@ -8,36 +8,32 @@
       <div class="flex w-full max-w-full md:max-w-3xl lg:max-w-2xl">
         <%= if @message.role == "assistant" do %>
           <div class="flex-shrink-0 flex items-start">
-            <div class="pt-0.5 juice:pt-0">
-              <div class="gizmo-bot-avatar flex h-6 w-6 items-center justify-center overflow-hidden rounded-full juice:h-8 juice:w-8">
-                <div class="relative p-1 rounded-sm flex items-center justify-center bg-base-300 text-base-content h-8 w-8">
-                  <img
-                    alt="LLM Chat"
-                    loading="lazy"
-                    width="24"
-                    height="24"
-                    decoding="async"
-                    data-nimg="1"
-                    class="rounded-sm"
-                    src="/images/llm-chat-avatar.png"
-                    style="color: transparent;"
-                  />
-                </div>
-              </div>
+            <div class="relative p-1 rounded-sm flex items-center justify-center bg-base-300 text-base-content h-8 w-8">
+              <img
+                alt="LLM Chat"
+                loading="lazy"
+                width="24"
+                height="24"
+                decoding="async"
+                data-nimg="1"
+                class="rounded-sm"
+                src="/images/llm-chat-avatar.png"
+                style="color: transparent;"
+              />
             </div>
           </div>
         <% end %>
-        <div class={"relative flex w-full flex-col#{if @message.role == "assistant", do: " agent-turn", else: ""} ml-3"}>
+        <div class={"relative flex w-full flex-col#{if @message.role == "assistant", do: " agent-turn", else: ""} group"}>
           <div class="flex-col gap-1 md:gap-3">
             <div class="flex flex-grow flex-col max-w-full">
               <div
                 data-message-author-role={"#{@message.role}"}
                 data-message-id={"#{@message.id}"}
                 dir="auto"
-                class="min-h-[20px] text-message flex flex-col items-start whitespace-normal break-words mt-5 w-full overflow-x-auto gap-2"
+                class="min-h-[20px] text-message flex flex-col items-start whitespace-pre-wrap break-words mt-5 w-full items-end overflow-x-auto gap-2"
               >
                 <div class="flex w-full flex-col gap-1 juice:empty:hidden items-end rtl:items-start">
-                  <div class={"relative rounded-3xl px-5 py-2.5 #{if @message.role == "assistant", do: "bg-[#f4f4f4] dark:bg-base-300 max-w-full md:max-w-3xl lg:max-w-2xl", else: "bg-[#f4f4f4] dark:bg-base-300 max-w-[70%] self-end"}"}>
+                  <div class="relative max-w-[70%] rounded-3xl bg-[#f4f4f4] px-5 py-2.5 dark:bg-base-300">
                     <%= if @is_streamed do %>
                       <span id="streaming-message"><%= @message.content %></span>
                     <% else %>
