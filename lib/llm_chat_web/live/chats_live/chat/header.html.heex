@@ -2,20 +2,23 @@
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-2">
       <%= if not @sidebar_open do %>
-          <span class="" data-state="closed">
-            <button
-              class="h-10 rounded-lg px-2.5 text-base-content/70 focus-visible:outline-0 hover:bg-base-200 focus-visible:bg-base-200"
-              phx-click="toggle_sidebar"
-            >
-              <.icon name="hero-newspaper" class="w-6 h-6" />
-            </button>
-          </span>
-          <span class="" data-state="closed">
-            <button class="h-10 rounded-lg px-2.5 text-base-content/70 focus-visible:outline-0 hover:bg-base-200 focus-visible:bg-base-200">
-              <.icon name="hero-pencil-square" class="w-6 h-6" />
-            </button>
-          </span>
-                <% end %>
+        <span class="" data-state="closed">
+          <button
+            class="h-10 rounded-lg px-2.5 text-base-content/70 focus-visible:outline-0 hover:bg-base-200 focus-visible:bg-base-200"
+            phx-click="toggle_sidebar"
+          >
+            <.icon name="hero-newspaper" class="w-6 h-6" />
+          </button>
+        </span>
+        <span class="" data-state="closed">
+          <button
+            class="h-10 rounded-lg px-2.5 text-base-content/70 focus-visible:outline-0 hover:bg-base-200 focus-visible:bg-base-200"
+            phx-click="to_index"
+          >
+            <.icon name="hero-pencil-square" class="w-6 h-6" />
+          </button>
+        </span>
+      <% end %>
       <div class="flex items-center cursor-pointer rounded-xl py-2 px-3 text-lg font-semibold hover:bg-base-200">
         ChatGPT <span class="text-base-content/70">4o</span>
         <.icon name="hero-chevron-down" class="w-6 h-6 text-base-content/50" />
