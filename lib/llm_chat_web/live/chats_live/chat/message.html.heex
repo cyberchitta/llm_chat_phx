@@ -1,43 +1,65 @@
-<div id={@id} class="w-full" dir="auto" data-testid={"conversation-turn-#{@message.turn_number}"}>
-  <div class="px-4 py-2 justify-center text-base md:gap-6 m-auto">
-    <div class="flex flex-1 text-base mx-auto gap-3 md:gap-6 md:px-5 lg:px-1 xl:px-5 md:max-w-3xl lg:max-w-4xl xl:max-w-6xl group">
-      <div class="flex-shrink-0 flex flex-col relative items-end">
-        <img
-          alt={"#{if @message.role == "assistant", do: "M.ai", else: "User"}"}
-          loading="lazy"
-          width="24"
-          height="24"
-          decoding="async"
-          data-nimg="1"
-          class="rounded-sm"
-          src={"/images/#{if @message.role == "assistant", do: "llm-chat-avatar.png", else: "user.png"}"}
-          style="color: transparent;"
-        />
-      </div>
-      <div class={"relative flex w-full flex-col#{if @message.role == "assistant", do: " agent-turn", else: ""}"}>
-        <div class="font-semibold select-none">
-          <%= if @message.role == "assistant", do: "M.ai", else: "You" %>
-        </div>
-        <div class="flex-col gap-1 md:gap-3">
-          <div class="flex flex-grow flex-col max-w-full">
-            <div
-              data-message-author-role={"#{@message.role}"}
-              data-message-id={"#{@message.id}"}
-              dir="auto"
-              class="min-h-[20px] flex flex-col items-start gap-3 whitespace-pre-wrap break-words overflow-x-auto"
-            >
-              <div class={"#{if @message.role == "assistant", do: "prose w-full break-words dark:prose-invert", else: ""}"}>
-                <%= if @is_streamed do %>
-                  <span id="streaming-message"><%= @message.content %></span>
-                <% else %>
-                  <%= @message.content %>
-                <% end %>
+<div
+  class="w-full text-base-content"
+  dir="auto"
+  data-testid={"conversation-turn-#{@message.turn_number}"}
+>
+  <div class="py-2 md:py-4 px-3 md:px-5 m-auto">
+    <div class="mx-auto flex flex-col items-center gap-3 text-base md:gap-4 md:max-w-3xl lg:max-w-5xl">
+      <div class="flex w-full max-w-full md:max-w-3xl lg:max-w-2xl">
+        <%= if @message.role == "assistant" do %>
+          <div class="flex-shrink-0 flex items-start">
+            <div class="pt-0.5 juice:pt-0">
+              <div class="gizmo-bot-avatar flex h-6 w-6 items-center justify-center overflow-hidden rounded-full juice:h-8 juice:w-8">
+                <div class="relative p-1 rounded-sm flex items-center justify-center bg-base-300 text-base-content h-8 w-8">
+                  <img
+                    alt="LLM Chat"
+                    loading="lazy"
+                    width="24"
+                    height="24"
+                    decoding="async"
+                    data-nimg="1"
+                    class="rounded-sm"
+                    src="/images/llm-chat-avatar.png"
+                    style="color: transparent;"
+                  />
+                </div>
               </div>
             </div>
           </div>
-          <%= unless @is_streamed do %>
-            <.msg-controls message={@message} />
-          <% end %>
+        <% end %>
+        <div class={"relative flex w-full flex-col#{if @message.role == "assistant", do: " agent-turn", else: ""} ml-3"}>
+          <div class="flex-col gap-1 md:gap-3">
+            <div class="flex flex-grow flex-col max-w-full">
+              <div
+                data-message-author-role={"#{@message.role}"}
+                data-message-id={"#{@message.id}"}
+                dir="auto"
+                class="min-h-[20px] text-message flex flex-col items-start whitespace-normal break-words mt-5 w-full overflow-x-auto gap-2"
+              >
+                <div class="flex w-full flex-col gap-1 juice:empty:hidden items-end rtl:items-start">
+                  <div class={"relative rounded-3xl px-5 py-2.5 #{if @message.role == "assistant", do: "bg-[#f4f4f4] dark:bg-base-300 max-w-full md:max-w-3xl lg:max-w-2xl", else: "bg-[#f4f4f4] dark:bg-base-300 max-w-[70%] self-end"}"}>
+                    <%= if @is_streamed do %>
+                      <span id="streaming-message"><%= @message.content %></span>
+                    <% else %>
+                      <%= @message.content %>
+                    <% end %>
+                    <%= if @message.role == "user" do %>
+                      <div class="absolute bottom-0 right-full top-0 -mr-3.5 hidden pr-5 pt-1 group-hover:block">
+                        <span class="" data-state="closed">
+                          <button class="flex h-9 w-9 items-center justify-center rounded-full text-base-content transition hover:bg-base-300">
+                            <.icon name="hero-pencil" class="w-4 h-4" />
+                          </button>
+                        </span>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <%= unless @is_streamed do %>
+              <.msg-controls message={@message} />
+            <% end %>
+          </div>
         </div>
       </div>
     </div>
