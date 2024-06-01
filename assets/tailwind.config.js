@@ -16,24 +16,6 @@ module.exports = {
       colors: {
         brand: "#FD4F00",
       },
-      fontFamily: {
-        sans: [
-          "ui-sans-serif",
-          "-apple-system",
-          "system-ui",
-          '"Segoe UI"',
-          "Roboto",
-          "Ubuntu",
-          "Cantarell",
-          "Noto Sans",
-          "sans-serif",
-          "Helvetica",
-          '"Apple Color Emoji"',
-          '"Segoe UI Emoji"',
-          '"Segoe UI Symbol"',
-          '"Noto Color Emoji"'
-        ],
-      },
     },
   },
   daisyui: {
