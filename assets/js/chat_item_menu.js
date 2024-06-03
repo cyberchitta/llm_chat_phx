@@ -8,11 +8,8 @@ export default {
       const { left: x, bottom: y } = rect;
       menu.style.left = `${x}px`;
       menu.style.top = `${y}px`;
-      if (menu.classList.contains("hidden")) {
-        menu.classList.remove("hidden");
-      } else {
-        menu.classList.add("hidden");
-      }
+      menu.setAttribute("data-chat-id", this.el.getAttribute("data-chat-id")); // Set chat ID for the menu
+      menu.classList.remove("hidden");
     });
     document.addEventListener("click", (event) => {
       const menu = document.querySelector("#chat-item-menu");
@@ -24,11 +21,8 @@ export default {
     menu.addEventListener("click", (event) => {
       event.stopPropagation();
     });
-    document.querySelector("#share-chat").addEventListener("click", () => {
-      menu.classList.add("hidden");
-    });
     document.querySelector("#rename-chat").addEventListener("click", () => {
-      const chatId = this.el.getAttribute("data-chat-id");
+      const chatId = menu.getAttribute("data-chat-id");
       const chatNameElement = document.querySelector(`#chat-name-${chatId}`);
       if (chatNameElement) {
         chatNameElement.innerHTML = `<input type="text" id="rename-input" value="${chatNameElement.textContent.trim()}" class="input input-bordered input-sm w-full max-w-xs" />`;
@@ -53,7 +47,7 @@ export default {
       menu.classList.add("hidden");
     });
     document.querySelector("#delete-chat").addEventListener("click", () => {
-      const chatId = this.el.getAttribute("data-chat-id");
+      const chatId = menu.getAttribute("data-chat-id");
       this.pushEventTo(this.el, "delete_chat", { id: chatId });
       menu.classList.add("hidden");
     });
