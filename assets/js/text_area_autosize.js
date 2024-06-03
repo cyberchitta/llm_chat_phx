@@ -1,9 +1,13 @@
 export default {
   mounted() {
+    this.adjustHeight = this.adjustHeight.bind(this);
+
+    this.el.addEventListener("input", this.adjustHeight);
     this.adjustHeight();
-    this.el.addEventListener("input", () => {
-      this.adjustHeight();
-    });
+  },
+
+  destroyed() {
+    this.el.removeEventListener("input", this.adjustHeight);
   },
 
   adjustHeight() {

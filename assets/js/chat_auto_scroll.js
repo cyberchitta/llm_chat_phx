@@ -1,5 +1,7 @@
 export default {
   mounted() {
+    this.scrollToBottom = this.scrollToBottom.bind(this);
+
     this.scrollToBottom();
   },
 
