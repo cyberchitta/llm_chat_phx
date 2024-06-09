@@ -1,34 +1,64 @@
 <form
   phx-submit="submit"
-  class="flex flex-row gap-3 mx-2 md:mx-4 lg:mx-auto lg:max-w-2xl xl:max-w-3xl"
+  class="w-full md:pt-0 md:w-[calc(100%-.5rem)] juice:w-full"
+  style="padding-left: 0px; padding-right: 0px;"
 >
-  <div class="relative flex h-full flex-1 flex-col">
-    <div class="flex w-full items-center">
-      <div class="overflow-hidden flex flex-col w-full flex-grow relative border border-base-300 rounded-2xl bg-base-100">
-        <textarea
-          id="prompt-textarea"
-          name="prompt-textarea"
-          tabindex="0"
-          data-id="root"
-          rows="1"
-          placeholder="Message M.ai…"
-          class="m-0 w-full resize-none border-0 bg-transparent focus:ring-0 focus-visible:ring-0 dark:bg-transparent py-2.5 pr-10 md:py-3.5 md:pr-12 max-h-[calc(12*1.5rem)] overflow-y-auto placeholder-base-content/50 dark:placeholder-base-content/50 pl-10 md:pl-14"
-          style="min-height: 52px;"
-          phx-hook="TextAreaAutosize"
-        ><%= get_in(@main, [:uistate, :prompt]) %></textarea>
-        <button
-          type={if @main.uistate.streaming, do: "button", else: "submit"}
-          class="absolute bottom-1.5 right-2 rounded-lg border border-base-content bg-base-content p-0.5 text-base-100 transition-colors enabled:bg-base-content disabled:opacity-50 md:bottom-3 md:right-3"
-          data-testid={if @main.uistate.streaming, do: "cancel-button", else: "send-button"}
-          phx-click={if @main.uistate.streaming, do: "cancel", else: ""}
-        >
-          <span data-state="closed">
-            <.icon
-              name={if @main.uistate.streaming, do: "hero-stop", else: "hero-arrow-up"}
-              class="w-6 h-6"
-            />
-          </span>
-        </button>
+  <div class="px-3 text-base md:px-4 m-auto md:px-5 lg:px-1 xl:px-5">
+    <div class="mx-auto flex flex-1 gap-3 text-base juice:gap-4 juice:md:gap-5 juice:lg:gap-6 md:max-w-3xl lg:max-w-[40rem] xl:max-w-[48rem]">
+      <div class="w-full">
+        <div class="relative flex h-full max-w-full flex-1 flex-col">
+          <div class="absolute bottom-full left-0 right-0 z-20"></div>
+          <div class="flex w-full items-center">
+            <div class="flex w-full flex-col gap-1.5 rounded-[26px] p-1.5 transition-colors bg-base-200 dark:bg-base-300">
+              <div class="flex items-center gap-1.5 md:gap-2">
+                <button
+                  type="button"
+                  id="radix-:r9o:"
+                  aria-haspopup="menu"
+                  aria-expanded="false"
+                  data-state="closed"
+                  class="text-base-content inline-flex items-center justify-center gap-1 rounded-lg text-sm leading-none outline-none cursor-pointer hover:bg-base-300 focus-visible:bg-base-300 radix-state-active:text-secondary radix-disabled:cursor-auto radix-disabled:bg-transparent radix-disabled:text-base-content/30 h-10 w-10 bg-transparent p-0"
+                >
+                  <.icon name="hero-paper-clip" class="w-6 h-6" />
+                </button>
+                <div class="flex min-w-0 flex-1 flex-col">
+                  <textarea
+                    id="prompt-textarea"
+                    name="prompt-textarea"
+                    tabindex="0"
+                    data-id="root"
+                    dir="auto"
+                    rows="1"
+                    placeholder="Message ChatGPT"
+                    class="m-0 resize-none border-0 bg-transparent px-0 text-base-content focus:ring-0 focus-visible:ring-0 max-h-[25dvh] max-h-52"
+                    style="height: 40px; overflow-y: hidden;"
+                  ><%= get_in(@main, [:uistate, :prompt]) %></textarea>
+                </div>
+                <button
+                  class="flex items-center justify-center text-base-content h-10 w-10 dark:text-white rounded-full focus-visible:outline-black dark:focus-visible:outline-white mb-1 ml-1.5"
+                  aria-disabled="false"
+                >
+                  <.icon name="hero-microphone" class="w-6 h-6" />
+                </button>
+                <button
+                  type={if @main.uistate.streaming, do: "button", else: "submit"}
+                  class="mb-1 me-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white transition-colors hover:opacity-70 focus-visible:outline-none focus-visible:outline-primary disabled:bg-base-content/30 disabled:text-base-content/10 disabled:hover:opacity-100 dark:bg-white dark:text-black dark:focus-visible:outline-white disabled:dark:bg-base-content/30 dark:disabled:text-base-content/10"
+                  data-testid={
+                    if @main.uistate.streaming, do: "cancel-button", else: "send-button"
+                  }
+                  phx-click={if @main.uistate.streaming, do: "cancel", else: ""}
+                >
+                  <span data-state="closed">
+                    <.icon
+                      name={if @main.uistate.streaming, do: "hero-stop", else: "hero-arrow-up"}
+                      class="w-6 h-6"
+                    />
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
