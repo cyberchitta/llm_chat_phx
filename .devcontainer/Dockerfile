@@ -1,4 +1,4 @@
-FROM hexpm/elixir:1.16.3-erlang-26.2.5-debian-bookworm-20240513
+FROM hexpm/elixir:1.17.0-erlang-27.0-debian-bookworm-20240612
 
 ENV DEBIAN_FRONTEND noninteractive
 
