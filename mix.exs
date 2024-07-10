@@ -44,7 +44,7 @@ defmodule LlmChat.MixProject do
        compile: false,
        depth: 1},
       {:jason, "~> 1.2"},
-      {:openai_ex, "~> 0.6"},
+      {:openai_ex, "~> 0.8.0"},
       {:phoenix, "~> 1.7.11"},
       {:phoenix_html, "~> 4.0"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
