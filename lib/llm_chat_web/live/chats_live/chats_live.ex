@@ -8,16 +8,20 @@ defmodule LlmChatWeb.ChatsLive do
   alias LlmChat.Contexts.Chat
   alias LlmChatWeb.UiState
 
-  def mount(%{"id" => chat_id}, %{"user_email" => user_email}, socket) do
-    {:ok, socket |> assign(UiState.index(user_email, chat_id)) |> enable_gauth()}
+  def mount(params = %{"id" => chat_id}, session = %{"user_email" => user_email}, socket) do
+    {:ok,
+     socket
+     |> assign(UiState.index(user_email, chat_id))
+     |> enable_attachments()
+     |> enable_gauth()}
   end
 
-  def mount(_params, %{"user_email" => user_email}, socket) do
-    {:ok, socket |> assign(UiState.index(user_email)) |> enable_gauth()}
+  def mount(_params, session = %{"user_email" => user_email}, socket) do
+    {:ok, socket |> assign(UiState.index(user_email)) |> enable_attachments() |> enable_gauth()}
   end
 
   def mount(_params, _session, socket) do
-    {:ok, socket |> assign(UiState.index(nil)) |> enable_gauth()}
+    {:ok, socket |> assign(UiState.index(nil)) |> enable_attachments() |> enable_gauth()}
   end
 
   def handle_params(%{"id" => chat_id, "prompt" => prompt}, _uri, socket) do
@@ -56,11 +60,20 @@ defmodule LlmChatWeb.ChatsLive do
     end
   end
 
-  def handle_event("submit", %{"prompt-textarea" => prompt}, socket) do
+  def handle_event("validate", _params, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("submit", params = %{"prompt-textarea" => prompt}, socket) do
+    attachments =
+      consume_uploaded_entries(socket, :attachments, fn %{path: path}, _entry ->
+        {:ok, path}
+      end)
+
     if Map.get(socket.assigns.main, :chat) do
-      handle_submit_existing_chat(prompt, socket)
+      handle_submit_existing_chat(prompt, attachments, socket)
     else
-      handle_submit_new_chat(prompt, socket)
+      handle_submit_new_chat(prompt, attachments, socket)
     end
   end
 
@@ -102,7 +115,7 @@ defmodule LlmChatWeb.ChatsLive do
   end
 
   def handle_info({:submit_prompt, prompt}, socket) do
-    handle_submit_existing_chat(prompt, socket)
+    handle_submit_existing_chat(prompt, [], socket)
   end
 
   def handle_info(message, socket) do
@@ -110,13 +123,13 @@ defmodule LlmChatWeb.ChatsLive do
     {:noreply, socket}
   end
 
-  defp handle_submit_new_chat(prompt, socket) do
+  defp handle_submit_new_chat(prompt, attachments, socket) do
     user = socket.assigns.user
     chat = Chat.create(%{name: "NewChat", user_id: user.id})
     {:noreply, socket |> push_navigate(to: ~p"/chats/#{chat.id}?prompt=#{URI.encode(prompt)}")}
   end
 
-  defp handle_submit_existing_chat(prompt, socket) do
+  defp handle_submit_existing_chat(prompt, attachments, socket) do
     main = socket.assigns.main
     chat_id = main.chat.id
     turn_number = length(main.messages) + 1
@@ -136,6 +149,12 @@ defmodule LlmChatWeb.ChatsLive do
     end)
 
     {:noreply, socket |> assign(main: main |> UiState.with_streaming(streaming))}
+  end
+
+  defp enable_attachments(socket) do
+    socket
+    |> assign(:uploaded_files, [])
+    |> allow_upload(:attachments, accept: ~w(.txt .md), max_entries: 2)
   end
 
   defp enable_gauth(socket) do
