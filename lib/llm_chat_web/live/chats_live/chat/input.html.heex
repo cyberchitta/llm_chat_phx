@@ -1,5 +1,11 @@
 <form
+  id="new-chat-message"
   phx-submit="submit"
+  phx-change="validate"
+  phx-auto-recover="10"
+  method="post"
+  phx-drop-target={@uploads.attachments.ref}
+  enctype="multipart/form-data"
   class="w-full md:pt-0 md:w-[calc(100%-.5rem)] juice:w-full"
   style="padding-left: 0px; padding-right: 0px;"
 >
@@ -11,13 +17,15 @@
           <div class="flex w-full items-center">
             <div class="flex w-full flex-col gap-1.5 rounded-[26px] p-1.5 transition-colors bg-base-200 dark:bg-base-300">
               <div class="flex items-center gap-1.5 md:gap-2">
+                <.live_file_input upload={@uploads.attachments} class="hidden" />
                 <button
                   type="button"
-                  id="radix-:r9o:"
+                  id="attach-button"
                   aria-haspopup="menu"
                   aria-expanded="false"
                   data-state="closed"
                   class="text-base-content inline-flex items-center justify-center gap-1 rounded-lg text-sm leading-none outline-none cursor-pointer hover:bg-base-300 focus-visible:bg-base-300 radix-state-active:text-secondary radix-disabled:cursor-auto radix-disabled:bg-transparent radix-disabled:text-base-content/30 h-10 w-10 bg-transparent p-0"
+                  onclick="document.querySelector('input[name=\'attachments\']').click();"
                 >
                   <.icon name="hero-paper-clip" class="w-6 h-6" />
                 </button>

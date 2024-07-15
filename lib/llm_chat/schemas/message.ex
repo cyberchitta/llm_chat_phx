@@ -9,6 +9,7 @@ defmodule LlmChat.Schemas.Message do
     field(:content, :string)
     field(:role, :string)
     field(:turn_number, :integer)
+    field(:attachments, {:array, :string}, default: [])
 
     belongs_to(:chat, LlmChat.Schemas.Chat, foreign_key: :chat_id, type: Ecto.UUID)
 
@@ -22,8 +23,8 @@ defmodule LlmChat.Schemas.Message do
 
   def changeset(message, attrs) do
     message
-    |> cast(attrs, [:content, :role, :chat_id, :turn_number, :original_message_id])
-    |> validate_required([:content, :role, :chat_id, :turn_number])
+    |> cast(attrs, [:content, :role, :chat_id, :turn_number, :original_message_id, :attachments])
+    |> validate_required([:role, :chat_id, :turn_number])
     |> validate_inclusion(:role, ["assistant", "user"])
     |> assoc_constraint(:chat)
     |> assoc_constraint(:original_message)

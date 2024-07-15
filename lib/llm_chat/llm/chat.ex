@@ -32,7 +32,7 @@ defmodule LlmChat.Llm.Chat do
 
   defp stream(openai, messages) do
     chat_request = create_request(messages: messages)
-    openai |> OpenaiEx.Chat.Completions.create(chat_request, stream: true)
+    openai |> OpenaiEx.Chat.Completions.create!(chat_request, stream: true)
   end
 
   defp content_stream(base_stream) do

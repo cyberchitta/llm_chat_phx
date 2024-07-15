@@ -1,8 +1,8 @@
-FROM hexpm/elixir:1.16.3-erlang-26.2.5-debian-bookworm-20240513
+FROM hexpm/elixir:1.17.2-erlang-27.0-debian-bookworm-20240701
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ARG PHOENIX_VERSION=1.7.11
+ARG PHOENIX_VERSION=1.7.14
 ARG NODEJS_VERSION=20.x
 
 RUN apt-get update && apt-get upgrade -y && \
