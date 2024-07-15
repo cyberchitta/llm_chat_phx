@@ -8,7 +8,7 @@ defmodule LlmChatWeb.ChatsLive do
   alias LlmChat.Contexts.Chat
   alias LlmChatWeb.UiState
 
-  def mount(params = %{"id" => chat_id}, %{"user_email" => user_email}, socket) do
+  def mount(%{"id" => chat_id}, %{"user_email" => user_email}, socket) do
     {:ok,
      socket
      |> assign(UiState.index(user_email, chat_id))
@@ -64,10 +64,10 @@ defmodule LlmChatWeb.ChatsLive do
     {:noreply, socket}
   end
 
-  def handle_event("submit", params = %{"prompt-textarea" => prompt}, socket) do
+  def handle_event("submit", %{"prompt-textarea" => prompt}, socket) do
     attachments =
       consume_uploaded_entries(socket, :attachments, fn %{path: path}, _entry ->
-        {:ok, path}
+        upload(path)
       end)
 
     if Map.get(socket.assigns.main, :chat) do
@@ -159,5 +159,13 @@ defmodule LlmChatWeb.ChatsLive do
 
   defp enable_gauth(socket) do
     socket |> assign(oauth_google_url: UserGauth.gauth_url())
+  end
+
+  def upload(path) do
+    filename = Path.basename(path)
+    unique_filename = "#{Ecto.UUID.generate()}_#{filename}"
+    destination = Path.join(["priv/static/uploads", unique_filename])
+    File.cp!(path, destination)
+    {:ok, ~p"/uploads/#{Path.basename(destination)}"}
   end
 end
