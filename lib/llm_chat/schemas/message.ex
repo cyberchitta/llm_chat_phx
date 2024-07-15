@@ -24,7 +24,7 @@ defmodule LlmChat.Schemas.Message do
   def changeset(message, attrs) do
     message
     |> cast(attrs, [:content, :role, :chat_id, :turn_number, :original_message_id, :attachments])
-    |> validate_required([:content, :role, :chat_id, :turn_number])
+    |> validate_required([:role, :chat_id, :turn_number])
     |> validate_inclusion(:role, ["assistant", "user"])
     |> assoc_constraint(:chat)
     |> assoc_constraint(:original_message)
