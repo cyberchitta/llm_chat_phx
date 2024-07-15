@@ -8,7 +8,7 @@ defmodule LlmChatWeb.ChatsLive do
   alias LlmChat.Contexts.Chat
   alias LlmChatWeb.UiState
 
-  def mount(params = %{"id" => chat_id}, session = %{"user_email" => user_email}, socket) do
+  def mount(params = %{"id" => chat_id}, %{"user_email" => user_email}, socket) do
     {:ok,
      socket
      |> assign(UiState.index(user_email, chat_id))
@@ -16,7 +16,7 @@ defmodule LlmChatWeb.ChatsLive do
      |> enable_gauth()}
   end
 
-  def mount(_params, session = %{"user_email" => user_email}, socket) do
+  def mount(_params, %{"user_email" => user_email}, socket) do
     {:ok, socket |> assign(UiState.index(user_email)) |> enable_attachments() |> enable_gauth()}
   end
 
