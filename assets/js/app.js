@@ -26,6 +26,7 @@ import TextAreaAutosize from "./text_area_autosize";
 import ChatAutoScroll from "./chat_auto_scroll";
 import SidebarToggle from "./sidebar_toggle";
 import ChatItemMenu from "./chat_item_menu";
+import FilePreview from "./file_preview";
 
 let Hooks = {};
 
@@ -33,6 +34,7 @@ Hooks.TextAreaAutosize = TextAreaAutosize;
 Hooks.ChatAutoScroll = ChatAutoScroll;
 Hooks.SidebarToggle = SidebarToggle;
 Hooks.ChatItemMenu = ChatItemMenu;
+Hooks.FilePreview = FilePreview;
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")

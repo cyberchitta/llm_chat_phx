@@ -89,6 +89,10 @@ defmodule LlmChatWeb.ChatsLive do
     end
   end
 
+  def handle_event("cancel-upload", %{"ref" => ref}, socket) do
+    {:noreply, cancel_upload(socket, :attachments, ref)}
+  end
+
   def handle_info({:cancel_pid, pid}, socket) do
     main = socket.assigns.main
     {:noreply, assign(socket, main: main |> UiState.with_cancel_pid(pid))}
