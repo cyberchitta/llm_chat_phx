@@ -37,5 +37,16 @@ services:
 #      options:
 #        max-size: 50m
 
+  minio:
+    env_file: ../envs/.dev.local.env
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+  
 volumes:
+  minio_data:
   database:
