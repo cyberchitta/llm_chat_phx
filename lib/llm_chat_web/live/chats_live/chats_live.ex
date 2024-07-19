@@ -6,6 +6,7 @@ defmodule LlmChatWeb.ChatsLive do
   import LlmChatWeb.Live.ChatsLive.Html
 
   alias LlmChat.Contexts.Chat
+  alias LlmChat.Files
   alias LlmChatWeb.UiState
 
   def mount(%{"id" => chat_id}, %{"user_email" => user_email}, socket) do
@@ -66,8 +67,9 @@ defmodule LlmChatWeb.ChatsLive do
 
   def handle_event("submit", %{"prompt-textarea" => prompt}, socket) do
     uploaded_files =
-      consume_uploaded_entries(socket, :attachments, fn %{path: path}, _entry ->
-        upload(path)
+      consume_uploaded_entries(socket, :attachments, fn %{path: path}, entry ->
+        content_type = entry.client_type || Files.MimeTypes.guess(entry.client_name)
+        upload(path, content_type)
       end)
       # TODO error message to user or log?
       |> Enum.reject(&is_nil/1)
@@ -169,11 +171,11 @@ defmodule LlmChatWeb.ChatsLive do
     socket |> assign(oauth_google_url: UserGauth.gauth_url())
   end
 
-  def upload(path) do
+  def upload(path, content_type) do
     filename = Path.basename(path)
     unique_filename = "#{Ecto.UUID.generate()}_#{filename}"
 
-    case LlmChat.S3Uploader.upload(path, unique_filename) do
+    case Files.S3Uploader.upload(path, unique_filename, content_type) do
       {:ok, url} -> {:ok, url}
       {:error, _} -> {:ok, nil}
     end

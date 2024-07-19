@@ -1,13 +1,11 @@
-defmodule LlmChat.S3Uploader do
-  @moduledoc """
-  Service for uploading files to S3-compatible storage.
-  """
+defmodule LlmChat.Files.S3Uploader do
+  @moduledoc false
 
-  def upload(file_path, file_name) do
+  def upload(file_path, file_name, content_type) do
     file_binary = File.read!(file_path)
 
     bucket()
-    |> ExAws.S3.put_object(file_name, file_binary)
+    |> ExAws.S3.put_object(file_name, file_binary, content_type: content_type)
     |> ExAws.request()
     |> case do
       {:ok, _} -> {:ok, url(file_name)}

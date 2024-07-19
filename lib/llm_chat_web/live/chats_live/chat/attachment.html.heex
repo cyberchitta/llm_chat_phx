@@ -1,19 +1,22 @@
+# lib/llm_chat_web/live/chats_live/chat/attachment.html.heex
 <div class="flex items-center gap-2 p-2 rounded-md bg-base-200">
-  <%= case Path.extname(@filename) do %>
-    <% ext when ext in [".jpg", ".jpeg", ".png", ".gif", ".svg"] -> %>
+  <%= case @attachment.content_type do %>
+    <% type when type in ["image/jpeg", "image/png", "image/gif", "image/svg+xml"] -> %>
       <.icon name="hero-photo" class="w-4 h-4 text-base-content/70" />
-    <% ext when ext in [".pdf", ".md", ".txt", ".doc", ".docx", ".rtf"] -> %>
+    <% type when type in ["application/pdf", "text/markdown", "text/plain", "text/html", "text/css", "text/javascript", "application/json"] -> %>
       <.icon name="hero-document-text" class="w-4 h-4 text-base-content/70" />
-    <% ext when ext in [".xls", ".xlsx", ".csv"] -> %>
-      <.icon name="hero-table-cells" class="w-4 h-4 text-base-content/70" />
-    <% ext when ext in [".mp3", ".wav", ".ogg"] -> %>
+    <% type when type in ["audio/mpeg", "audio/wav", "audio/ogg"] -> %>
       <.icon name="hero-musical-note" class="w-4 h-4 text-base-content/70" />
-    <% ext when ext in [".mp4", ".avi", ".mov"] -> %>
+    <% type when type in ["video/mp4", "video/x-msvideo", "video/quicktime"] -> %>
       <.icon name="hero-film" class="w-4 h-4 text-base-content/70" />
     <% _ -> %>
       <.icon name="hero-paper-clip" class="w-4 h-4 text-base-content/70" />
   <% end %>
-  <a href={@url} target="_blank" class="text-primary hover:underline flex-1 truncate text-sm">
-    <%= @filename %>
+  <a
+    href={@attachment.url}
+    target="_blank"
+    class="text-primary hover:underline flex-1 truncate text-sm"
+  >
+    <%= Path.basename(@attachment.url) %>
   </a>
 </div>
