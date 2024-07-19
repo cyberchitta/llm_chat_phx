@@ -7,7 +7,7 @@ defmodule LlmChat.Repo.Postgres.Migrations.CreateMessages do
       add(:role, :string, null: false)
       add(:content, :text, null: true)
       add(:turn_number, :integer, null: false)
-      add(:attachments, {:array, :string}, default: [])
+      add(:attachments, {:array, :map}, default: [])
 
       add(:chat_id, references(:chats, type: :uuid, on_delete: :delete_all), null: false)
       add(:original_message_id, references(:messages, type: :uuid, on_delete: :nilify_all))
