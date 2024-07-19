@@ -44,11 +44,23 @@ config :llm_chat, LlmChat.RepoPostgres,
   ssl: false
 
 config :llm_chat,
-  openai_api_key: env!("OPENAI_API_KEY")
+  openai_api_key: env!("OPENAI_API_KEY"),
+  s3_bucket_name: env!("S3_BUCKET_NAME")
 
 config :elixir_auth_google,
   client_id: env!("GOOGLE_CLIENT_ID"),
   client_secret: env!("GOOGLE_CLIENT_SECRET")
+
+config :ex_aws,
+  json_codec: Jason,
+  access_key_id: env!("AWS_ACCESS_KEY_ID"),
+  secret_access_key: env!("AWS_SECRET_ACCESS_KEY")
+
+config :ex_aws, :s3,
+  scheme: env!("S3_SCHEME"),
+  host: env!("S3_HOST"),
+  port: env!("S3_PORT"),
+  region: env!("S3_REGION")
 
 if config_env() == :prod do
   host = env!("PHX_HOST", :string, "example.com")

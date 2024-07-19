@@ -12,7 +12,7 @@ defmodule LlmChatWeb.UiState do
     index(user_email, Chat.details(chat_id) |> Map.put(:uistate, uistate("")))
   end
 
-  def index(user_email, main = %{}) do
+  def index(user_email, %{} = main) do
     %{
       main: main,
       sidebar: sidebar(user_email),

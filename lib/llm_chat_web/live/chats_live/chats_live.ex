@@ -65,15 +65,19 @@ defmodule LlmChatWeb.ChatsLive do
   end
 
   def handle_event("submit", %{"prompt-textarea" => prompt}, socket) do
-    attachments =
+    uploaded_files =
       consume_uploaded_entries(socket, :attachments, fn %{path: path}, _entry ->
         upload(path)
       end)
+      # TODO error message to user or log?
+      |> Enum.reject(&is_nil/1)
+
+    upd_socket = update(socket, :uploaded_files, &(&1 ++ uploaded_files))
 
     if Map.get(socket.assigns.main, :chat) do
-      handle_submit_existing_chat(prompt, attachments, socket)
+      handle_submit_existing_chat(prompt, uploaded_files, upd_socket)
     else
-      handle_submit_new_chat(prompt, attachments, socket)
+      handle_submit_new_chat(prompt, uploaded_files, upd_socket)
     end
   end
 
@@ -168,8 +172,10 @@ defmodule LlmChatWeb.ChatsLive do
   def upload(path) do
     filename = Path.basename(path)
     unique_filename = "#{Ecto.UUID.generate()}_#{filename}"
-    destination = Path.join(["priv/static/uploads", unique_filename])
-    File.cp!(path, destination)
-    {:ok, ~p"/uploads/#{Path.basename(destination)}"}
+
+    case LlmChat.S3Uploader.upload(path, unique_filename) do
+      {:ok, url} -> {:ok, url}
+      {:error, _} -> {:ok, nil}
+    end
   end
 end
