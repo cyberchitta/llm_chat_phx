@@ -9,7 +9,6 @@ defmodule LlmChatWeb.UserGauth do
 
   # 5 days in seconds
   @max_age 60 * 60 * 24 * 5
-  @last_visit_cookie "_llm_chat_last_visit"
   @session_error "You must be logged in with a current session to access this page."
 
   def max_age(), do: @max_age
@@ -18,7 +17,7 @@ defmodule LlmChatWeb.UserGauth do
     LlmChatWeb.Endpoint.url() |> ElixirAuthGoogle.generate_oauth_url()
   end
 
-  defp login_url(), do: ~p"/gauth"
+  defp login_url(), do: ~p"/login"
 
   def fetch_current_user(conn, _opts) do
     user_email = get_session(conn, :user_email)
