@@ -17,7 +17,7 @@ defmodule LlmChatWeb.GauthController do
   end
 
   def callback(conn, _params) do
-    Logger.warn("Invalid Google Auth callback parameters")
+    Logger.warning("Invalid Google Auth callback parameters")
     handle_auth_error(conn, "Invalid authentication response. Please try again.")
   end
 
