@@ -8,9 +8,7 @@ defmodule LlmChatWeb.GauthController do
     with {:ok, token} <- ElixirAuthGoogle.get_token(code, conn),
          {:ok, profile} <- ElixirAuthGoogle.get_user_profile(token.access_token),
          {:ok, user} <- LlmChat.Contexts.User.upsert(profile) do
-      conn
-      |> UserGauth.log_in_user(user)
-      |> render(:welcome, user: user)
+      conn |> UserGauth.log_in_user(user) |> render(:welcome, user: user)
     else
       {:error, reason} ->
         Logger.error("Google Auth error: #{inspect(reason)}")
@@ -24,14 +22,10 @@ defmodule LlmChatWeb.GauthController do
   end
 
   def logout(conn, _params) do
-    conn
-    |> put_flash(:info, "Logged out successfully.")
-    |> UserGauth.log_out_user()
+    conn |> put_flash(:info, "Logged out successfully.") |> UserGauth.log_out_user()
   end
 
   defp handle_auth_error(conn, message) do
-    conn
-    |> put_flash(:error, message)
-    |> redirect(to: ~p"/login")
+    conn |> put_flash(:error, message) |> redirect(to: ~p"/login")
   end
 end
