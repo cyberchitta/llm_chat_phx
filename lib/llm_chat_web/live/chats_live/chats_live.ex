@@ -146,7 +146,7 @@ defmodule LlmChatWeb.ChatsLive do
     turn_number = length(main.messages) + 1
 
     streaming = %{
-      user: Chat.user_msg(chat_id, turn_number, prompt) |> Map.put(:id, nil),
+      user: Chat.user_msg(chat_id, turn_number, prompt, attachments) |> Map.put(:id, nil),
       assistant: Chat.assistant_msg(chat_id, turn_number + 1, "") |> Map.put(:id, nil),
       cancel_pid: nil
     }
@@ -154,7 +154,7 @@ defmodule LlmChatWeb.ChatsLive do
     liveview_pid = self()
 
     Task.Supervisor.start_child(LlmChat.TaskSupervisor, fn ->
-      stream = LlmChat.Llm.Chat.initiate_stream(prompt)
+      stream = LlmChat.Llm.Chat.initiate_stream(prompt, attachments)
       send(liveview_pid, {:cancel_pid, stream.task_pid})
       LlmChat.Llm.Chat.process_stream(liveview_pid, stream)
     end)
