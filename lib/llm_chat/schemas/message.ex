@@ -25,10 +25,22 @@ defmodule LlmChat.Schemas.Message do
     message
     |> cast(attrs, [:content, :role, :chat_id, :turn_number, :original_message_id, :attachments])
     |> validate_required([:role, :chat_id, :turn_number])
+    |> validate_content_or_attachments()
     |> validate_inclusion(:role, ["assistant", "user"])
     |> validate_attachments()
     |> assoc_constraint(:chat)
     |> assoc_constraint(:original_message)
+  end
+
+  defp validate_content_or_attachments(changeset) do
+    content = get_field(changeset, :content)
+    attachments = get_field(changeset, :attachments)
+
+    if is_nil(content) and Enum.empty?(attachments) do
+      add_error(changeset, :content, "can't be blank when there are no attachments")
+    else
+      changeset
+    end
   end
 
   defp validate_attachments(changeset) do

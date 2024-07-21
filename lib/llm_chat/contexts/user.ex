@@ -17,7 +17,7 @@ defmodule LlmChat.Contexts.User do
     |> all()
   end
 
-  def upsert!(p) do
+  def upsert(p) do
     u = %{google_id: p.sub, email: p.email, name: p.name, avatar_url: p.picture}
 
     case User |> get_by(email: p.email) do

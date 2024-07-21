@@ -28,40 +28,42 @@ defmodule LlmChat.Contexts.Chat do
     |> update!()
   end
 
-  def user_msg(chat_id, turn_number, content) do
-    msg(chat_id, turn_number, "user", content)
+  def user_msg(chat_id, turn_number, content, attachments \\ []) do
+    msg(chat_id, turn_number, "user", content, attachments)
   end
 
   def assistant_msg(chat_id, turn_number, content) do
     msg(chat_id, turn_number, "assistant", content)
   end
 
-  defp msg(chat_id, turn_number, role, content) do
-    %{chat_id: chat_id, turn_number: turn_number, role: role, content: content}
+  defp msg(chat_id, turn_number, role, content, attachments \\ []) do
+    %{
+      chat_id: chat_id,
+      turn_number: turn_number,
+      role: role,
+      content: content,
+      attachments: attachments
+    }
   end
 
-  def add_message!(chat_id, content, role, turn_number) do
+  def add_message!(chat_id, content, role, turn_number, attachments \\ []) do
     %Message{}
     |> Message.changeset(%{
       content: content,
       chat_id: chat_id,
       role: role,
-      turn_number: turn_number
+      turn_number: turn_number,
+      attachments: attachments |> Enum.map(&Map.take(&1, [:url, :content_type, :filename]))
     })
     |> insert!()
   end
 
   def details(chat_id) do
-    chat = Chat |> get(chat_id)
-
-    messages =
-      from(m in Message,
-        where: m.chat_id == ^chat_id,
-        order_by: [asc: m.inserted_at]
-      )
-      |> all()
-
-    %{chat: chat, messages: messages}
+    %{
+      chat: Chat |> get(chat_id),
+      messages:
+        from(m in Message, where: m.chat_id == ^chat_id, order_by: [asc: m.inserted_at]) |> all()
+    }
   end
 
   def list_by_period(user_email) do

@@ -66,7 +66,7 @@ defmodule LlmChatWeb.ChatsLive do
   end
 
   def handle_event("submit", %{"prompt-textarea" => prompt}, socket) do
-    uploaded_files =
+    uploads =
       consume_uploaded_entries(socket, :attachments, fn %{path: path}, entry ->
         content_type = entry.client_type || Files.MimeTypes.guess(entry.client_name)
         upload(path, content_type)
@@ -74,12 +74,13 @@ defmodule LlmChatWeb.ChatsLive do
       # TODO error message to user or log?
       |> Enum.reject(&is_nil/1)
 
-    upd_socket = update(socket, :uploaded_files, &(&1 ++ uploaded_files))
+    uploaded_urls = Enum.map(uploads, & &1.url)
+    upd_socket = update(socket, :uploaded_files, &(&1 ++ uploaded_urls))
 
     if Map.get(socket.assigns.main, :chat) do
-      handle_submit_existing_chat(prompt, uploaded_files, upd_socket)
+      handle_submit_existing_chat(prompt, uploads, upd_socket)
     else
-      handle_submit_new_chat(prompt, uploaded_files, upd_socket)
+      handle_submit_new_chat(prompt, uploads, upd_socket)
     end
   end
 
@@ -164,7 +165,7 @@ defmodule LlmChatWeb.ChatsLive do
   defp enable_attachments(socket) do
     socket
     |> assign(:uploaded_files, [])
-    |> allow_upload(:attachments, accept: ~w(.txt .md), max_entries: 2)
+    |> allow_upload(:attachments, accept: ~w(.txt .md .jpg .jpeg .png .gif .webp), max_entries: 2)
   end
 
   defp enable_gauth(socket) do
@@ -176,7 +177,7 @@ defmodule LlmChatWeb.ChatsLive do
     unique_filename = "#{Ecto.UUID.generate()}_#{filename}"
 
     case Files.S3Uploader.upload(path, unique_filename, content_type) do
-      {:ok, url} -> {:ok, url}
+      {:ok, upload} -> {:ok, upload}
       {:error, _} -> {:ok, nil}
     end
   end

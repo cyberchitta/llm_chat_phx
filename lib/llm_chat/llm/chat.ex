@@ -3,9 +3,12 @@ defmodule LlmChat.Llm.Chat do
   alias OpenaiEx
   alias OpenaiEx.ChatMessage
 
-  def initiate_stream(prompt) do
+  @supported_image_types ["image/jpeg", "image/png", "image/gif", "image/webp"]
+  @supported_text_types ["text/plain", "text/markdown"]
+
+  def initiate_stream(prompt, attachments \\ []) do
     openai = Application.get_env(:llm_chat, :openai_api_key) |> OpenaiEx.new()
-    messages = create_messages(prompt)
+    messages = create_messages(prompt, attachments)
     openai |> stream(messages)
   end
 
@@ -17,16 +20,63 @@ defmodule LlmChat.Llm.Chat do
     OpenaiEx.HttpSse.cancel_request(cancel_pid)
   end
 
-  defp create_messages(prompt) do
+  defp create_messages(prompt, attachments) do
     [
       ChatMessage.system("You are an AI assistant."),
-      ChatMessage.user(prompt)
+      create_user_message(prompt, attachments)
     ]
+  end
+
+  defp create_user_message(prompt, []) do
+    ChatMessage.user(prompt)
+  end
+
+  defp create_user_message(prompt, attachments) do
+    process_attachments(prompt, attachments)
+    |> create_message_content()
+    |> ChatMessage.user()
+  end
+
+  defp create_message_content({text_content, images}) do
+    if Enum.empty?(images) do
+      text_content
+    else
+      [
+        %{type: "text", text: text_content}
+        | images |> Enum.map(&%{type: "image_url", image_url: %{url: &1.url}})
+      ]
+      |> MsgContent.new()
+    end
+  end
+
+  defp process_attachments(prompt, attachments) do
+    Enum.reduce(attachments, {prompt, []}, fn a, {acc_text, acc_images} ->
+      case a.content_type do
+        type when type in @supported_text_types ->
+          {:ok, text_content} = get_attachment_content(a)
+          {acc_text <> "\n\n--- Attachment: #{a.filename} ---\n" <> text_content, acc_images}
+
+        type when type in @supported_image_types ->
+          {acc_text, acc_images ++ [a]}
+
+        _ ->
+          Logger.warning("Unsupported attachment type: #{a.content_type} for file #{a.filename}")
+          {acc_text, acc_images}
+      end
+    end)
+  end
+
+  defp get_attachment_content(attachment) do
+    cond do
+      Map.has_key?(attachment, :content) -> {:ok, attachment.content}
+      Map.has_key?(attachment, :url) -> LlmChat.Files.S3Uploader.download(attachment.url)
+      true -> {:error, "Unable to read attachment content"}
+    end
   end
 
   defp create_request(args) do
     args
-    |> Enum.into(%{model: "gpt-3.5-turbo", temperature: 0.7})
+    |> Enum.into(%{model: "gpt-4o-mini", temperature: 0.7})
     |> OpenaiEx.Chat.Completions.new()
   end
 
