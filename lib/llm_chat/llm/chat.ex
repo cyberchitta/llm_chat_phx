@@ -1,7 +1,7 @@
 defmodule LlmChat.Llm.Chat do
   @moduledoc false
   alias OpenaiEx
-  alias OpenaiEx.ChatMessage
+  alias OpenaiEx.{ChatMessage, MsgContent}
 
   @supported_image_types ["image/jpeg", "image/png", "image/gif", "image/webp"]
   @supported_text_types ["text/plain", "text/markdown"]
@@ -32,45 +32,40 @@ defmodule LlmChat.Llm.Chat do
   end
 
   defp create_user_message(prompt, attachments) do
-    process_attachments(prompt, attachments)
-    |> create_message_content()
+    attachments
+    |> Enum.reduce({prompt, []}, &attach/2)
+    |> to_message()
     |> ChatMessage.user()
   end
 
-  defp create_message_content({text_content, images}) do
-    if Enum.empty?(images) do
-      text_content
-    else
-      [
-        %{type: "text", text: text_content}
-        | images |> Enum.map(&%{type: "image_url", image_url: %{url: &1.url}})
-      ]
-      |> MsgContent.new()
+  defp attach(a, {acc_text, acc_images}) do
+    case a.content_type do
+      type when type in @supported_text_types ->
+        {:ok, text_content} = get_content(a)
+        {acc_text <> "\n\n--- Attachment: #{a.filename} ---\n" <> text_content, acc_images}
+
+      type when type in @supported_image_types ->
+        {acc_text, acc_images ++ [a]}
+
+      _ ->
+        Logger.warning("Unsupported attachment type: #{a.content_type} for file #{a.filename}")
+        {acc_text, acc_images}
     end
   end
 
-  defp process_attachments(prompt, attachments) do
-    Enum.reduce(attachments, {prompt, []}, fn a, {acc_text, acc_images} ->
-      case a.content_type do
-        type when type in @supported_text_types ->
-          {:ok, text_content} = get_attachment_content(a)
-          {acc_text <> "\n\n--- Attachment: #{a.filename} ---\n" <> text_content, acc_images}
-
-        type when type in @supported_image_types ->
-          {acc_text, acc_images ++ [a]}
-
-        _ ->
-          Logger.warning("Unsupported attachment type: #{a.content_type} for file #{a.filename}")
-          {acc_text, acc_images}
-      end
-    end)
-  end
-
-  defp get_attachment_content(attachment) do
+  defp get_content(attachment) do
     cond do
       Map.has_key?(attachment, :content) -> {:ok, attachment.content}
       Map.has_key?(attachment, :url) -> LlmChat.Files.S3Uploader.download(attachment.url)
       true -> {:error, "Unable to read attachment content"}
+    end
+  end
+
+  defp to_message({text_content, images}) do
+    if Enum.empty?(images) do
+      text_content
+    else
+      [MsgContent.text(text_content) | images |> Enum.map(&MsgContent.image_url(&1.url))]
     end
   end
 
