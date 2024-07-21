@@ -7,13 +7,17 @@ defmodule LlmChatWeb.UserGauth do
 
   alias LlmChat.Contexts.User
 
+  # 5 days in seconds
+  @max_age 60 * 60 * 24 * 5
+  @session_error "You must be logged in with a current session to access this page."
+
+  def max_age(), do: @max_age
+
   def gauth_url() do
     LlmChatWeb.Endpoint.url() |> ElixirAuthGoogle.generate_oauth_url()
   end
 
-  @session_error "You must be logged in with a current session to access this page."
-
-  defp login_url(), do: ~p"/gauth"
+  defp login_url(), do: ~p"/login"
 
   def fetch_current_user(conn, _opts) do
     user_email = get_session(conn, :user_email)
@@ -21,14 +25,11 @@ defmodule LlmChatWeb.UserGauth do
   end
 
   def validate_user_session(conn, _opts) do
-    user_email = get_session(conn, :user_email)
-    expiration = get_session(conn, :gauth_expiration)
-
-    if is_nil(expiration) || DateTime.now!("Etc/UTC") |> DateTime.compare(expiration) == :gt do
-      conn |> plug_force_login()
+    with email when not is_nil(email) <- get_session(conn, :user_email),
+         user when not is_nil(user) <- User.get_by_email(email) do
+      conn |> assign(:user, user)
     else
-      user = User.get_by_email(user_email)
-      if is_nil(user), do: conn |> plug_force_login(), else: conn |> assign(:user, user)
+      _ -> conn |> plug_force_login()
     end
   end
 
@@ -42,8 +43,8 @@ defmodule LlmChatWeb.UserGauth do
     if conn.assigns[:user_email], do: conn, else: conn |> plug_force_login()
   end
 
-  def log_in_user(conn, user, oauth_expiration) do
-    conn |> renew_session() |> start_session(user.email, oauth_expiration)
+  def log_in_user(conn, user) do
+    conn |> renew_session() |> start_session(user.email)
   end
 
   def log_out_user(conn) do
@@ -107,10 +108,9 @@ defmodule LlmChatWeb.UserGauth do
     conn |> configure_session(renew: true) |> clear_session()
   end
 
-  defp start_session(conn, token, gauth_expiration) do
+  defp start_session(conn, token) do
     conn
     |> put_session(:user_email, token)
-    |> put_session(:gauth_expiration, gauth_expiration)
     |> put_session(:live_socket_id, "users_sessions:#{Base.url_encode64(token)}")
   end
 

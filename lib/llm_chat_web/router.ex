@@ -17,6 +17,7 @@ defmodule LlmChatWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    get "/login", PageController, :login
     get "/gauth", PageController, :gauth
   end
 

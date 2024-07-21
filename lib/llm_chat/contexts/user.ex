@@ -17,15 +17,12 @@ defmodule LlmChat.Contexts.User do
     |> all()
   end
 
-  def upsert!(profile) do
-    u = %{
-      google_id: profile.sub,
-      email: profile.email,
-      name: profile.name,
-      avatar_url: profile.picture
-    }
+  def upsert!(p) do
+    u = %{google_id: p.sub, email: p.email, name: p.name, avatar_url: p.picture}
 
-    user = User |> get_by(email: profile.email)
-    if user, do: user, else: %User{} |> User.changeset(u) |> insert!()
+    case User |> get_by(email: p.email) do
+      nil -> %User{} |> User.changeset(u) |> insert()
+      user -> {:ok, user}
+    end
   end
 end

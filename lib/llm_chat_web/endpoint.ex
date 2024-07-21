@@ -5,7 +5,8 @@ defmodule LlmChatWeb.Endpoint do
     store: :cookie,
     key: "_llm_chat_key",
     signing_salt: "BaD13kBG",
-    same_site: "Lax"
+    same_site: "Lax",
+    max_age: LlmChatWeb.UserGauth.max_age()
   ]
 
   socket "/live", Phoenix.LiveView.Socket,
