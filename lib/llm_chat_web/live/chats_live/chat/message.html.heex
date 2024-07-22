@@ -51,7 +51,10 @@
                 <%= if @message.attachments && length(@message.attachments) > 0 do %>
                   <div class="mt-2 space-y-2 w-full">
                     <%= for attachment <- @message.attachments do %>
-                      <.attachment filename={Path.basename(attachment.filename)} attachment={attachment} />
+                      <.attachment
+                        filename={Path.basename(attachment.filename)}
+                        attachment={attachment}
+                      />
                     <% end %>
                   </div>
                 <% end %>
