@@ -6,7 +6,7 @@ defmodule LlmChat.Llm.Chat do
   @supported_image_types ["image/jpeg", "image/png", "image/gif", "image/webp"]
   @supported_text_types ["text/plain", "text/markdown"]
 
-  def initiate_stream(prompt, attachments \\ []) do
+  def initiate_stream(prompt, attachments) do
     openai = Application.get_env(:llm_chat, :openai_api_key) |> OpenaiEx.new()
     messages = create_messages(prompt, attachments)
     openai |> stream(messages)
