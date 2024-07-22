@@ -54,7 +54,7 @@ defmodule LlmChatWeb.ChatsLive do
   def handle_event("delete_chat", %{"id" => chat_id}, socket) do
     Chat.delete(chat_id)
 
-    if socket.assigns.main.chat.id == chat_id do
+    if get_in(socket.assigns, [:main, :chat, :id]) == chat_id do
       {:noreply, socket |> push_navigate(to: ~p"/chats")}
     else
       {:noreply, assign(socket, :sidebar, UiState.sidebar(socket.assigns.user_email))}
