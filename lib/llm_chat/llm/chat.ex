@@ -1,5 +1,6 @@
 defmodule LlmChat.Llm.Chat do
   @moduledoc false
+  require Logger
   alias OpenaiEx
   alias OpenaiEx.{ChatMessage, MsgContent}
 
