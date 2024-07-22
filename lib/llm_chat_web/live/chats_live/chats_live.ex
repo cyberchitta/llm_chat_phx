@@ -18,11 +18,11 @@ defmodule LlmChatWeb.ChatsLive do
   end
 
   def mount(_params, %{"user_email" => user_email}, socket) do
-    {:ok, socket |> assign(UiState.index(user_email)) |> enable_attachments() |> enable_gauth()}
+    {:ok, socket |> assign(UiState.index(user_email)) |> enable_gauth()}
   end
 
   def mount(_params, _session, socket) do
-    {:ok, socket |> assign(UiState.index(nil)) |> enable_attachments() |> enable_gauth()}
+    {:ok, socket |> assign(UiState.index(nil)) |> enable_gauth()}
   end
 
   def handle_params(%{"id" => chat_id, "prompt" => prompt}, _uri, socket) do
@@ -66,22 +66,7 @@ defmodule LlmChatWeb.ChatsLive do
   end
 
   def handle_event("submit", %{"prompt-textarea" => prompt}, socket) do
-    uploads =
-      consume_uploaded_entries(socket, :attachments, fn %{path: path}, entry ->
-        content_type = entry.client_type || Files.MimeTypes.guess(entry.client_name)
-        upload(path, content_type)
-      end)
-      # TODO error message to user or log?
-      |> Enum.reject(&is_nil/1)
-
-    uploaded_urls = Enum.map(uploads, & &1.url)
-    upd_socket = update(socket, :uploaded_files, &(&1 ++ uploaded_urls))
-
-    if Map.get(socket.assigns.main, :chat) do
-      handle_submit_existing_chat(prompt, uploads, upd_socket)
-    else
-      handle_submit_new_chat(prompt, uploads, upd_socket)
-    end
+    handle_uploads(socket) |> handle_submit(prompt)
   end
 
   def handle_event("cancel", _, socket) do
@@ -134,7 +119,15 @@ defmodule LlmChatWeb.ChatsLive do
     {:noreply, socket}
   end
 
-  defp handle_submit_new_chat(prompt, attachments, socket) do
+  defp handle_submit({attachments, socket}, prompt) do
+    if socket.assigns.live_actions == :index do
+      handle_submit_new_chat(prompt, socket)
+    else
+      handle_submit_existing_chat(prompt, attachments, socket)
+    end
+  end
+
+  defp handle_submit_new_chat(prompt, socket) do
     user = socket.assigns.user
     chat = Chat.create(%{name: "NewChat", user_id: user.id})
     {:noreply, socket |> push_navigate(to: ~p"/chats/#{chat.id}?prompt=#{URI.encode(prompt)}")}
@@ -160,6 +153,23 @@ defmodule LlmChatWeb.ChatsLive do
     end)
 
     {:noreply, socket |> assign(main: main |> UiState.with_streaming(streaming))}
+  end
+
+  defp handle_uploads(socket) do
+    if socket.assigns.live_action != :index do
+      uploads =
+        consume_uploaded_entries(socket, :attachments, fn %{path: path}, entry ->
+          content_type = entry.client_type || Files.MimeTypes.guess(entry.client_name)
+          upload(path, content_type)
+        end)
+        |> Enum.reject(&is_nil/1)
+
+      uploaded_fns = Enum.map(uploads, & &1.filename)
+      upd_socket = update(socket, :uploaded_files, &(&1 ++ uploaded_fns))
+      {uploads, upd_socket}
+    else
+      {[], socket}
+    end
   end
 
   defp enable_attachments(socket) do

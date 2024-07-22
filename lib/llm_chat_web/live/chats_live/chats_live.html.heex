@@ -4,4 +4,9 @@
   oauth_google_url={@oauth_google_url}
   sidebar_open={@sidebar_open}
 />
-<.chat main={@main} user={@user} sidebar_open={@sidebar_open} uploads={@uploads} />
+<.chat
+  main={@main}
+  user={@user}
+  sidebar_open={@sidebar_open}
+  uploads={if @live_action == :show, do: @uploads}
+/>
