@@ -102,7 +102,7 @@ defmodule LlmChatWeb.ChatsLive do
 
     user = streaming.user
     asst = streaming.assistant
-    user_record = Chat.add_message!(user.chat_id, user.turn_number, user.content, user.role)
+    user_record = Chat.add_message!(user.chat_id, user.turn_number, user.content, user.role, user.attachments)
     asst_record = Chat.add_message!(asst.chat_id, asst.turn_number, asst.content, asst.role)
     Chat.touch(user.chat_id)
     next_messages = main.messages ++ [user_record, asst_record]
