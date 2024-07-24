@@ -46,13 +46,13 @@ defmodule LlmChat.Contexts.Chat do
     }
   end
 
-  def add_message!(chat_id, content, role, turn_number, attachments \\ []) do
+  def add_message!(chat_id, turn_number, content, role, attachments \\ []) do
     %Message{}
     |> Message.changeset(%{
-      content: content,
       chat_id: chat_id,
-      role: role,
       turn_number: turn_number,
+      role: role,
+      content: content,
       attachments: attachments |> Enum.map(&Map.take(&1, [:url, :content_type, :filename]))
     })
     |> insert!()
