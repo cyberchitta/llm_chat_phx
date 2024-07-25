@@ -114,14 +114,6 @@ defmodule LlmChat.Contexts.Chat do
   defp where_parent_id_is(query, nil), do: where(query, [m], is_nil(m.parent_id))
   defp where_parent_id_is(query, parent_id), do: where(query, [m], m.parent_id == ^parent_id)
 
-  defp get_descendants(chat_id, path) do
-    Message
-    |> where(chat_id: ^chat_id)
-    |> where([m], like(m.path, ^"#{path}.%"))
-    |> order_by([m], m.path)
-    |> all()
-  end
-
   defp get_ui_thread(chat_id) do
     path = Chat |> get!(chat_id) |> Map.get(:ui_path)
 
