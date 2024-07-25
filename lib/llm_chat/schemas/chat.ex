@@ -7,6 +7,7 @@ defmodule LlmChat.Schemas.Chat do
   @primary_key {:id, Ecto.UUID, autogenerate: true}
   schema "chats" do
     field(:name, :string)
+    field(:ui_path, :string)
 
     belongs_to(:user, LlmChat.Schemas.User, foreign_key: :user_id, type: Ecto.UUID)
     has_many(:messages, LlmChat.Schemas.Message, foreign_key: :chat_id)
@@ -16,7 +17,7 @@ defmodule LlmChat.Schemas.Chat do
 
   def changeset(chat, attrs) do
     chat
-    |> cast(attrs, [:name, :user_id])
+    |> cast(attrs, [:name, :user_id, :ui_path])
     |> validate_required([:name, :user_id])
     |> assoc_constraint(:user)
   end

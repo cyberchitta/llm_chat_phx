@@ -6,30 +6,39 @@ defmodule LlmChat.Schemas.Message do
 
   @primary_key {:id, Ecto.UUID, autogenerate: true}
   schema "messages" do
-    field(:content, :string)
-    field(:role, :string)
     field(:turn_number, :integer)
+    field(:path, :string)
+    field(:role, :string)
+    field(:content, :string)
     field(:attachments, {:array, :map}, default: [])
 
-    belongs_to(:chat, LlmChat.Schemas.Chat, foreign_key: :chat_id, type: Ecto.UUID)
+    field(:sibling_info, :map, virtual: true)
 
-    belongs_to(:original_message, LlmChat.Schemas.Message,
-      foreign_key: :original_message_id,
-      type: Ecto.UUID
-    )
+    belongs_to(:chat, LlmChat.Schemas.Chat, foreign_key: :chat_id, type: Ecto.UUID)
+    belongs_to(:parent, LlmChat.Schemas.Message, foreign_key: :parent_id, type: Ecto.UUID)
 
     timestamps()
   end
 
   def changeset(message, attrs) do
     message
-    |> cast(attrs, [:content, :role, :chat_id, :turn_number, :original_message_id, :attachments])
+    |> cast(attrs, [
+      :chat_id,
+      :parent_id,
+      :turn_number,
+      :path,
+      :role,
+      :content,
+      :attachments,
+      :sibling_info
+    ])
     |> validate_required([:role, :chat_id, :turn_number])
     |> validate_content_or_attachments()
     |> validate_inclusion(:role, ["assistant", "user"])
     |> validate_attachments()
     |> assoc_constraint(:chat)
-    |> assoc_constraint(:original_message)
+    |> assoc_constraint(:parent)
+    |> unique_constraint([:chat_id, :turn_number])
   end
 
   defp validate_content_or_attachments(changeset) do

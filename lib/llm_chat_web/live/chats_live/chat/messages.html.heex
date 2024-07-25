@@ -1,5 +1,10 @@
 <%= for message <- @messages do %>
-  <.message id={message.id} message={message} is_streamed={false} />
+  <.message
+    id={message.id}
+    message={message}
+    is_streamed={false}
+    sibling_info={message.sibling_info}
+  />
 <% end %>
 <%= if @uistate.streaming do %>
   <.message id="current-request" message={@uistate.streaming.user} is_streamed={false} />

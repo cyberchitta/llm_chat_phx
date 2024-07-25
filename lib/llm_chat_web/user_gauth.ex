@@ -17,7 +17,7 @@ defmodule LlmChatWeb.UserGauth do
     LlmChatWeb.Endpoint.url() |> ElixirAuthGoogle.generate_oauth_url()
   end
 
-  defp login_url(), do: ~p"/login"
+  def login_url(), do: ~p"/login"
 
   def fetch_current_user(conn, _opts) do
     user_email = get_session(conn, :user_email)
