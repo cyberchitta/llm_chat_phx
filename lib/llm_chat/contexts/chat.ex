@@ -53,6 +53,16 @@ defmodule LlmChat.Contexts.Chat do
     |> update!()
   end
 
+  def details(chat_id) do
+    %{
+      chat: Chat |> get(chat_id),
+      messages:
+        chat_id
+        |> get_ui_thread()
+        |> Enum.map(&Map.put(&1, :sibling_info, get_sibling_info(chat_id, &1)))
+    }
+  end
+
   def add_message!(%{parent_id: nil} = attrs) do
     attrs |> Map.put(:path, to_string(attrs.turn_number)) |> insert_message!()
   end
@@ -63,18 +73,23 @@ defmodule LlmChat.Contexts.Chat do
   end
 
   defp insert_message!(attrs) do
-    attachments = Enum.map(attrs.attachments, &Map.take(&1, [:url, :content_type, :filename]))
-    %Message{} |> Message.changeset(%{attrs | attachments: attachments}) |> insert!()
+    {:ok, result} =
+      transaction(fn ->
+        attachments = Enum.map(attrs.attachments, &Map.take(&1, [:url, :content_type, :filename]))
+        msg = %Message{} |> Message.changeset(%{attrs | attachments: attachments}) |> insert!()
+        update_max_turn_number!(msg.chat_id, msg.turn_number)
+        msg
+      end)
+
+    result
   end
 
-  def details(chat_id) do
-    %{
-      chat: Chat |> get(chat_id),
-      messages:
-        chat_id
-        |> get_ui_thread()
-        |> Enum.map(&Map.put(&1, :sibling_info, get_sibling_info(chat_id, &1)))
-    }
+  defp update_max_turn_number!(chat_id, turn_number) do
+    from(c in Chat, where: c.id == ^chat_id)
+    |> Ecto.Query.update(
+      set: [max_turn_number: fragment("GREATEST(max_turn_number, ?)", ^turn_number)]
+    )
+    |> update_all([])
   end
 
   def update_ui_path!(chat_id, path) do

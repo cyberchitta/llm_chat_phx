@@ -117,20 +117,7 @@ defmodule LlmChatWeb.ChatsLive do
 
   defp chat_submit_existing(prompt, attachments, socket) do
     main = socket.assigns.main
-    messages = main.messages
-
-    chat_id = main.chat.id
-    turn_number = length(messages) + 1
-    parent_id = if Enum.empty?(messages), do: nil, else: List.last(messages).id
-    msg_u = Chat.msg(chat_id, parent_id, turn_number)
-    msg_a = Chat.msg(chat_id, nil, turn_number + 1)
-
-    streaming = %{
-      user: msg_u |> Chat.with_content(prompt, attachments) |> Chat.to_user(),
-      assistant: msg_a |> Chat.with_content() |> Chat.to_assistant(),
-      cancel_pid: nil
-    }
-
+    streaming = chat_stream_state(main, prompt, attachments)
     liveview_pid = self()
 
     Task.Supervisor.start_child(LlmChat.TaskSupervisor, fn ->
@@ -140,6 +127,22 @@ defmodule LlmChatWeb.ChatsLive do
     end)
 
     {:noreply, socket |> assign(main: main |> UiState.with_streaming(streaming))}
+  end
+
+  defp chat_stream_state(main, prompt, attachments) do
+    chat_id = main.chat.id
+    messages = main.messages
+    turn_number = main.chat.max_turn_number + 1
+
+    parent_id = if Enum.empty?(messages), do: nil, else: List.last(messages).id
+    msg_u = Chat.msg(chat_id, parent_id, turn_number)
+    msg_a = Chat.msg(chat_id, nil, turn_number + 1)
+
+    %{
+      user: msg_u |> Chat.with_content(prompt, attachments) |> Chat.to_user(),
+      assistant: msg_a |> Chat.with_content() |> Chat.to_assistant(),
+      cancel_pid: nil
+    }
   end
 
   defp chat_cancel_upload(%{"ref" => ref}, socket) do
