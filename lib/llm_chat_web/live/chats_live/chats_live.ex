@@ -67,7 +67,7 @@ defmodule LlmChatWeb.ChatsLive do
   end
 
   def handle_info({:cancel_pid, pid}, socket) do
-    streamer_with_cancel_pid(pid)
+    streamer_with_cancel_pid(pid, socket)
   end
 
   def handle_info({:next_chunk, chunk}, socket) do
