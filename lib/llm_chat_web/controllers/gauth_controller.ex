@@ -26,6 +26,6 @@ defmodule LlmChatWeb.GauthController do
   end
 
   defp handle_auth_error(conn, message) do
-    conn |> put_flash(:error, message) |> redirect(to: ~p"/login")
+    conn |> put_flash(:error, message) |> redirect(to: ~p"/")
   end
 end
