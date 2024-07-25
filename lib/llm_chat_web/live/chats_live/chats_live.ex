@@ -97,7 +97,7 @@ defmodule LlmChatWeb.ChatsLive do
     socket |> assign(oauth_google_url: UserGauth.gauth_url())
   end
 
-  def chat_validate(_, socket) do
+  defp chat_validate(_, socket) do
     {:noreply, socket}
   end
 
@@ -200,11 +200,11 @@ defmodule LlmChatWeb.ChatsLive do
     {:noreply, assign(socket, main: next_main |> UiState.with_streaming())}
   end
 
-  def sidebar_toggle(socket) do
+  defp sidebar_toggle(socket) do
     {:noreply, update(socket, :sidebar_open, fn sidebar_open -> !sidebar_open end)}
   end
 
-  def sidebar_to_index(socket) do
+  defp sidebar_to_index(socket) do
     if socket.assigns.live_action != :index do
       {:noreply, push_navigate(socket, to: ~p"/chats")}
     else
@@ -212,12 +212,12 @@ defmodule LlmChatWeb.ChatsLive do
     end
   end
 
-  def sidebar_rename_chat(%{"id" => chat_id, "new_name" => new_name}, socket) do
+  defp sidebar_rename_chat(%{"id" => chat_id, "new_name" => new_name}, socket) do
     Chat.rename(chat_id, new_name)
     {:noreply, assign(socket, :sidebar, UiState.sidebar(socket.assigns.user_email))}
   end
 
-  def sidebar_delete_chat(%{"id" => chat_id}, socket) do
+  defp sidebar_delete_chat(%{"id" => chat_id}, socket) do
     Chat.delete(chat_id)
 
     if get_in(socket.assigns, [:main, :chat, :id]) == chat_id do
