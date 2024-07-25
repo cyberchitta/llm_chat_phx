@@ -90,10 +90,14 @@ defmodule LlmChat.Contexts.Chat do
 
   defp get_siblings(chat_id, parent_id) do
     Message
-    |> where(chat_id: ^chat_id, parent_id: ^parent_id)
+    |> where([m], m.chat_id == ^chat_id)
+    |> where_parent_id_is(parent_id)
     |> order_by([m], m.turn_number)
     |> all()
   end
+
+  defp where_parent_id_is(query, nil), do: where(query, [m], is_nil(m.parent_id))
+  defp where_parent_id_is(query, parent_id), do: where(query, [m], m.parent_id == ^parent_id)
 
   defp get_descendants(chat_id, path) do
     Message
@@ -104,11 +108,11 @@ defmodule LlmChat.Contexts.Chat do
   end
 
   defp get_ui_thread(chat_id) do
-    chat = Chat |> get!(chat_id)
+    path = Chat |> get!(chat_id) |> Map.get(:ui_path)
 
     Message
     |> where(chat_id: ^chat_id)
-    |> where([m], fragment("? ~ ('^' || ? || '($|\\.)')", m.path, ^chat.ui_path))
+    |> where([m], fragment("? = ? OR starts_with(?, ? || '.')", m.path, ^path, ^path, m.path))
     |> order_by([m], m.turn_number)
     |> all()
   end
