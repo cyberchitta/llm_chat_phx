@@ -1,0 +1,25 @@
+<%= if @sibling_info do %>
+  <div class="flex items-center space-x-2 text-sm text-base-content/70">
+    <button
+      phx-click="navigate_sibling"
+      phx-value-direction="prev"
+      phx-value-chat-id={@chat_id}
+      phx-value-message-id={@message_id}
+      class="btn btn-sm btn-ghost"
+      disabled={@sibling_info.current == 1}
+    >
+      <.icon name="hero-chevron-left" class="w-4 h-4" />
+    </button>
+    <span><%= @sibling_info.current %>/<%= @sibling_info.total %></span>
+    <button
+      phx-click="navigate_sibling"
+      phx-value-direction="next"
+      phx-value-chat-id={@chat_id}
+      phx-value-message-id={@message_id}
+      class="btn btn-sm btn-ghost"
+      disabled={@sibling_info.current == @sibling_info.total}
+    >
+      <.icon name="hero-chevron-right" class="w-4 h-4" />
+    </button>
+  </div>
+<% end %>

@@ -58,7 +58,7 @@ defmodule LlmChat.Contexts.Chat do
   end
 
   def add_message!(%{parent_id: parent_id} = attrs) do
-    parent_path = get_by!(Message, parent_id: parent_id).path
+    parent_path = get_by!(Message, id: parent_id).path
     attrs |> Map.put(:path, "#{parent_path}.#{attrs.turn_number}") |> insert_message!()
   end
 
@@ -67,18 +67,35 @@ defmodule LlmChat.Contexts.Chat do
     %Message{} |> Message.changeset(%{attrs | attachments: attachments}) |> insert!()
   end
 
+  def details(chat_id) do
+    %{
+      chat: Chat |> get(chat_id),
+      messages:
+        chat_id
+        |> get_ui_thread()
+        |> Enum.map(&Map.put(&1, :sibling_info, get_sibling_info(chat_id, &1)))
+    }
+  end
+
   def update_ui_path!(chat_id, path) do
     Chat |> get!(chat_id) |> Chat.changeset(%{ui_path: path}) |> update!()
   end
 
-  def get_siblings(chat_id, parent_id) do
+  defp get_sibling_info(chat_id, message) do
+    siblings = get_siblings(chat_id, message.parent_id)
+    sibling_ids = Enum.map(siblings, & &1.id)
+    current_index = Enum.find_index(sibling_ids, &(&1 == message.id))
+    %{current: current_index + 1, total: length(siblings), sibling_ids: sibling_ids}
+  end
+
+  defp get_siblings(chat_id, parent_id) do
     Message
     |> where(chat_id: ^chat_id, parent_id: ^parent_id)
     |> order_by([m], m.turn_number)
     |> all()
   end
 
-  def get_descendants(chat_id, path) do
+  defp get_descendants(chat_id, path) do
     Message
     |> where(chat_id: ^chat_id)
     |> where([m], like(m.path, ^"#{path}.%"))
@@ -86,7 +103,7 @@ defmodule LlmChat.Contexts.Chat do
     |> all()
   end
 
-  def get_ui_thread(chat_id) do
+  defp get_ui_thread(chat_id) do
     chat = Chat |> get!(chat_id)
 
     Message
@@ -94,10 +111,6 @@ defmodule LlmChat.Contexts.Chat do
     |> where([m], fragment("? ~ ('^' || ? || '($|\\.)')", m.path, ^chat.ui_path))
     |> order_by([m], m.turn_number)
     |> all()
-  end
-
-  def details(chat_id) do
-    %{chat: Chat |> get(chat_id), messages: chat_id |> get_ui_thread()}
   end
 
   def msg(chat_id, parent_id, turn_number) do

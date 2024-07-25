@@ -103,8 +103,8 @@ defmodule LlmChatWeb.ChatsLive do
     asst = streaming.assistant
 
     user_msg = Chat.add_message!(user)
-    asst_msg = Chat.add_message!(asst)
-    Chat.touch(user.chat_id)
+    asst_msg = Chat.add_message!(asst |> Map.put(:parent_id, user_msg.id))
+    Chat.update_ui_path!(user.chat_id, asst_msg.path)
     next_messages = main.messages ++ [user_msg, asst_msg]
     next_main = %{main | messages: next_messages}
     {:noreply, assign(socket, main: next_main |> UiState.with_streaming())}
@@ -140,11 +140,12 @@ defmodule LlmChatWeb.ChatsLive do
     chat_id = main.chat.id
     turn_number = length(messages) + 1
     parent_id = if Enum.empty?(messages), do: nil, else: List.last(messages).id
-    msg = Chat.msg(chat_id, parent_id, turn_number)
+    msg_u = Chat.msg(chat_id, parent_id, turn_number)
+    msg_a = Chat.msg(chat_id, nil, turn_number + 1)
 
     streaming = %{
-      user: msg |> Chat.with_content(prompt, attachments) |> Chat.to_user(),
-      assistant: msg |> Chat.with_content() |> Chat.to_assistant(),
+      user: msg_u |> Chat.with_content(prompt, attachments) |> Chat.to_user(),
+      assistant: msg_a |> Chat.with_content() |> Chat.to_assistant(),
       cancel_pid: nil
     }
 
