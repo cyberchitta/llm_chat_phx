@@ -68,7 +68,7 @@ defmodule LlmChat.Contexts.Chat do
   end
 
   def add_message!(%{parent_id: parent_id} = attrs) do
-    parent_path = get_by!(Message, id: parent_id).path
+    parent_path = Message |> get_by(id: parent_id) |> Map.get(:path)
     attrs |> Map.put(:path, "#{parent_path}.#{attrs.turn_number}") |> insert_message!()
   end
 
