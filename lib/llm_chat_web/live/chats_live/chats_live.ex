@@ -35,33 +35,22 @@ defmodule LlmChatWeb.ChatsLive do
   end
 
   def handle_event("toggle_sidebar", _, socket) do
-    {:noreply, update(socket, :sidebar_open, fn sidebar_open -> !sidebar_open end)}
+    sidebar_toggle(socket)
   end
 
   def handle_event("to_index", _, socket) do
-    if socket.assigns.live_action != :index do
-      {:noreply, push_navigate(socket, to: ~p"/chats")}
-    else
-      {:noreply, socket}
-    end
+    sidebar_to_index(socket)
   end
 
-  def handle_event("rename_chat", %{"id" => chat_id, "new_name" => new_name}, socket) do
-    Chat.rename(chat_id, new_name)
-    {:noreply, assign(socket, :sidebar, UiState.sidebar(socket.assigns.user_email))}
+  def handle_event("rename_chat", %{"id" => _, "new_name" => _} = params, socket) do
+    sidebar_rename_chat(params, socket)
   end
 
-  def handle_event("delete_chat", %{"id" => chat_id}, socket) do
-    Chat.delete(chat_id)
-
-    if get_in(socket.assigns, [:main, :chat, :id]) == chat_id do
-      {:noreply, socket |> push_navigate(to: ~p"/chats")}
-    else
-      {:noreply, assign(socket, :sidebar, UiState.sidebar(socket.assigns.user_email))}
-    end
+  def handle_event("delete_chat", %{"id" => _} = params, socket) do
+    sidebar_delete_chat(params, socket)
   end
 
-  def handle_event("validate", _params, socket) do
+  def handle_event("validate", _, socket) do
     {:noreply, socket}
   end
 
@@ -194,6 +183,33 @@ defmodule LlmChatWeb.ChatsLive do
     case Files.S3Uploader.upload(path, unique_filename, content_type) do
       {:ok, upload} -> {:ok, upload}
       {:error, _} -> {:ok, nil}
+    end
+  end
+
+  def sidebar_toggle(socket) do
+    {:noreply, update(socket, :sidebar_open, fn sidebar_open -> !sidebar_open end)}
+  end
+
+  def sidebar_to_index(socket) do
+    if socket.assigns.live_action != :index do
+      {:noreply, push_navigate(socket, to: ~p"/chats")}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def sidebar_rename_chat(%{"id" => chat_id, "new_name" => new_name}, socket) do
+    Chat.rename(chat_id, new_name)
+    {:noreply, assign(socket, :sidebar, UiState.sidebar(socket.assigns.user_email))}
+  end
+
+  def sidebar_delete_chat(%{"id" => chat_id}, socket) do
+    Chat.delete(chat_id)
+
+    if get_in(socket.assigns, [:main, :chat, :id]) == chat_id do
+      {:noreply, socket |> push_navigate(to: ~p"/chats")}
+    else
+      {:noreply, assign(socket, :sidebar, UiState.sidebar(socket.assigns.user_email))}
     end
   end
 end
