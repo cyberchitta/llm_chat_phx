@@ -99,13 +99,13 @@ defmodule LlmChatWeb.ChatsLive do
   def handle_info(:end_of_stream, socket) do
     main = socket.assigns.main
     streaming = main.uistate.streaming
-
     user = streaming.user
     asst = streaming.assistant
-    user_record = Chat.add_message!(user.chat_id, user.turn_number, user.content, user.role, user.attachments)
-    asst_record = Chat.add_message!(asst.chat_id, asst.turn_number, asst.content, asst.role)
+
+    user_msg = Chat.add_message!(user)
+    asst_msg = Chat.add_message!(asst)
     Chat.touch(user.chat_id)
-    next_messages = main.messages ++ [user_record, asst_record]
+    next_messages = main.messages ++ [user_msg, asst_msg]
     next_main = %{main | messages: next_messages}
     {:noreply, assign(socket, main: next_main |> UiState.with_streaming())}
   end
@@ -120,7 +120,7 @@ defmodule LlmChatWeb.ChatsLive do
   end
 
   defp handle_submit({attachments, socket}, prompt) do
-    if socket.assigns.live_actions == :index do
+    if socket.assigns.live_action == :index do
       handle_submit_new_chat(prompt, socket)
     else
       handle_submit_existing_chat(prompt, attachments, socket)
@@ -135,12 +135,16 @@ defmodule LlmChatWeb.ChatsLive do
 
   defp handle_submit_existing_chat(prompt, attachments, socket) do
     main = socket.assigns.main
+    messages = main.messages
+
     chat_id = main.chat.id
-    turn_number = length(main.messages) + 1
+    turn_number = length(messages) + 1
+    parent_id = if Enum.empty?(messages), do: nil, else: List.last(messages).id
+    msg = Chat.msg(chat_id, parent_id, turn_number)
 
     streaming = %{
-      user: Chat.user_msg(chat_id, turn_number, prompt, attachments) |> Map.put(:id, nil),
-      assistant: Chat.assistant_msg(chat_id, turn_number + 1, "") |> Map.put(:id, nil),
+      user: msg |> Chat.with_content(prompt, attachments) |> Chat.to_user(),
+      assistant: msg |> Chat.with_content() |> Chat.to_assistant(),
       cancel_pid: nil
     }
 

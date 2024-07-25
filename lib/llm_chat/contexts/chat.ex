@@ -2,69 +2,7 @@ defmodule LlmChat.Contexts.Chat do
   @moduledoc false
   import Ecto.Query
   import LlmChat.RepoPostgres
-  alias LlmChat.RepoPostgres
   alias LlmChat.Schemas.{Chat, Message, User}
-
-  def create(attrs) do
-    %Chat{} |> Chat.changeset(attrs) |> insert!()
-  end
-
-  def rename(chat_id, new_name) do
-    Chat
-    |> RepoPostgres.get!(chat_id)
-    |> Chat.changeset(%{name: new_name})
-    |> RepoPostgres.update!()
-  end
-
-  def delete(chat_id) do
-    Chat |> RepoPostgres.get!(chat_id) |> RepoPostgres.delete!()
-  end
-
-  def touch(chat_id) do
-    Chat
-    |> get(chat_id)
-    |> Chat.changeset(%{})
-    |> Ecto.Changeset.put_change(:updated_at, DateTime.utc_now(:second))
-    |> update!()
-  end
-
-  def user_msg(chat_id, turn_number, content, attachments \\ []) do
-    msg(chat_id, turn_number, "user", content, attachments)
-  end
-
-  def assistant_msg(chat_id, turn_number, content) do
-    msg(chat_id, turn_number, "assistant", content)
-  end
-
-  defp msg(chat_id, turn_number, role, content, attachments \\ []) do
-    %{
-      chat_id: chat_id,
-      turn_number: turn_number,
-      role: role,
-      content: content,
-      attachments: attachments
-    }
-  end
-
-  def add_message!(chat_id, turn_number, content, role, attachments \\ []) do
-    %Message{}
-    |> Message.changeset(%{
-      chat_id: chat_id,
-      turn_number: turn_number,
-      role: role,
-      content: content,
-      attachments: attachments |> Enum.map(&Map.take(&1, [:url, :content_type, :filename]))
-    })
-    |> insert!()
-  end
-
-  def details(chat_id) do
-    %{
-      chat: Chat |> get(chat_id),
-      messages:
-        from(m in Message, where: m.chat_id == ^chat_id, order_by: [asc: m.inserted_at]) |> all()
-    }
-  end
 
   def list_by_period(user_email) do
     from(c in Chat,
@@ -93,5 +31,94 @@ defmodule LlmChat.Contexts.Chat do
       Date.compare(date, one_month_ago) in [:eq, :gt] -> "Previous 30 Days"
       true -> "#{Calendar.strftime(date, "%B")} #{date.year}"
     end
+  end
+
+  def create(attrs) do
+    %Chat{} |> Chat.changeset(attrs) |> insert!()
+  end
+
+  def rename(chat_id, new_name) do
+    Chat |> get!(chat_id) |> Chat.changeset(%{name: new_name}) |> update!()
+  end
+
+  def delete(chat_id) do
+    Chat |> get!(chat_id) |> delete!()
+  end
+
+  def touch(chat_id) do
+    Chat
+    |> get!(chat_id)
+    |> Chat.changeset(%{})
+    |> Ecto.Changeset.put_change(:updated_at, DateTime.utc_now(:second))
+    |> update!()
+  end
+
+  def add_message!(%{parent_id: nil} = attrs) do
+    attrs |> Map.put(:path, to_string(attrs.turn_number)) |> insert_message!()
+  end
+
+  def add_message!(%{parent_id: parent_id} = attrs) do
+    parent_path = get_by!(Message, parent_id: parent_id).path
+    attrs |> Map.put(:path, "#{parent_path}.#{attrs.turn_number}") |> insert_message!()
+  end
+
+  defp insert_message!(attrs) do
+    attachments = Enum.map(attrs.attachments, &Map.take(&1, [:url, :content_type, :filename]))
+    %Message{} |> Message.changeset(%{attrs | attachments: attachments}) |> insert!()
+  end
+
+  def update_ui_path!(chat_id, path) do
+    Chat |> get!(chat_id) |> Chat.changeset(%{ui_path: path}) |> update!()
+  end
+
+  def get_siblings(chat_id, parent_id) do
+    Message
+    |> where(chat_id: ^chat_id, parent_id: ^parent_id)
+    |> order_by([m], m.turn_number)
+    |> all()
+  end
+
+  def get_descendants(chat_id, path) do
+    Message
+    |> where(chat_id: ^chat_id)
+    |> where([m], like(m.path, ^"#{path}.%"))
+    |> order_by([m], m.path)
+    |> all()
+  end
+
+  def get_ui_thread(chat_id) do
+    chat = Chat |> get!(chat_id)
+
+    Message
+    |> where(chat_id: ^chat_id)
+    |> where([m], fragment("? ~ ('^' || ? || '($|\\.)')", m.path, ^chat.ui_path))
+    |> order_by([m], m.turn_number)
+    |> all()
+  end
+
+  def details(chat_id) do
+    %{chat: Chat |> get(chat_id), messages: chat_id |> get_ui_thread()}
+  end
+
+  def msg(chat_id, parent_id, turn_number) do
+    %{id: nil, chat_id: chat_id, parent_id: parent_id, turn_number: turn_number}
+  end
+
+  def with_content(msg, content \\ "", attachments \\ []) do
+    msg |> Map.put(:content, content) |> Map.put(:attachments, attachments)
+  end
+
+  def to_user(msg) do
+    msg |> with_role("user")
+  end
+
+  def to_assistant(msg) do
+    msg |> with_role("assistant")
+  end
+
+  defp with_role(attrs, role) do
+    attrs
+    |> Map.take([:id, :chat_id, :parent_id, :turn_number, :path, :content, :attachments])
+    |> Map.put(:role, role)
   end
 end

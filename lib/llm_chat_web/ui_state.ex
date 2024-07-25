@@ -5,11 +5,12 @@ defmodule LlmChatWeb.UiState do
   def index(user_email) do
     suggestions = Suggestion.get_default()
     prompt = Enum.random(suggestions)
-    index(user_email, %{suggestions: suggestions, uistate: uistate(prompt)})
+    index(user_email, %{suggestions: suggestions, uistate: uistate(nil, prompt)})
   end
 
   def index(user_email, chat_id) when is_binary(chat_id) do
-    index(user_email, Chat.details(chat_id) |> Map.put(:uistate, uistate("")))
+    main = Chat.details(chat_id)
+    index(user_email, main |> Map.put(:uistate, uistate(main.chat.ui_path, "")))
   end
 
   def index(user_email, %{} = main) do
@@ -25,8 +26,8 @@ defmodule LlmChatWeb.UiState do
     if is_nil(user_email), do: %{periods: []}, else: %{periods: Chat.list_by_period(user_email)}
   end
 
-  defp uistate(prompt) do
-    %{streaming: nil, prompt: prompt}
+  defp uistate(ui_path, prompt) do
+    %{streaming: nil, ui_path: ui_path, prompt: prompt}
   end
 
   def with_streaming(main, streaming \\ nil) do
