@@ -124,6 +124,22 @@ defmodule LlmChat.Contexts.Chat do
     |> all()
   end
 
+  def get_leftmost_path(chat_id, message_id) do
+    message = Message |> get_by(id: message_id)
+
+    leftmost_child =
+      Message
+      |> where([m], m.chat_id == ^chat_id and m.parent_id == ^message_id)
+      |> order_by([m], asc: m.turn_number)
+      |> limit(1)
+      |> one()
+
+    case leftmost_child do
+      nil -> message.path
+      child -> get_leftmost_path(chat_id, child.id)
+    end
+  end
+
   def msg(chat_id, parent_id, turn_number) do
     %{id: nil, chat_id: chat_id, parent_id: parent_id, turn_number: turn_number}
   end
