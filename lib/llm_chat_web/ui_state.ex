@@ -4,8 +4,8 @@ defmodule LlmChatWeb.UiState do
 
   def index(user_email) do
     suggestions = Suggestion.get_default()
-    prompt = Enum.random(suggestions)
-    index(user_email, %{suggestions: suggestions, uistate: uistate(nil, prompt)})
+    suggestion = Enum.random(suggestions)
+    index(user_email, %{suggestions: suggestions, uistate: uistate(nil, suggestion)})
   end
 
   def index(user_email, chat_id) when is_binary(chat_id) do
@@ -26,8 +26,8 @@ defmodule LlmChatWeb.UiState do
     if is_nil(user_email), do: %{periods: []}, else: %{periods: Chat.list_by_period(user_email)}
   end
 
-  defp uistate(ui_path, prompt) do
-    %{streaming: nil, ui_path: ui_path, prompt: prompt}
+  defp uistate(ui_path, suggestion) do
+    %{streaming: nil, ui_path: ui_path, suggestion: suggestion, edit_msg_id: ""}
   end
 
   def with_streaming(main, streaming \\ nil) do
