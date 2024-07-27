@@ -27,6 +27,7 @@ import ChatAutoScroll from "./chat_auto_scroll";
 import SidebarToggle from "./sidebar_toggle";
 import ChatItemMenu from "./chat_item_menu";
 import FilePreview from "./file_preview";
+import MsgEditAutosize from "./msg_edit_autosize";
 
 let Hooks = {};
 
@@ -35,6 +36,7 @@ Hooks.ChatAutoScroll = ChatAutoScroll;
 Hooks.SidebarToggle = SidebarToggle;
 Hooks.ChatItemMenu = ChatItemMenu;
 Hooks.FilePreview = FilePreview;
+Hooks.MsgEditAutosize = MsgEditAutosize;
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")

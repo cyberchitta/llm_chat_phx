@@ -37,16 +37,43 @@
                 class="min-h-[20px] text-message flex flex-col items-start whitespace-normal break-words mt-5 w-full overflow-x-auto gap-2"
               >
                 <div class="flex w-full flex-col gap-1 juice:empty:hidden items-end rtl:items-start">
-                  <div class={"relative rounded-3xl px-5 py-2.5 #{if @message.role == "assistant", do: "bg-[#f4f4f4] dark:bg-base-300 max-w-full md:max-w-3xl lg:max-w-2xl", else: "bg-[#f4f4f4] dark:bg-base-300 max-w-[70%] self-end"}"}>
-                    <%= if @is_streamed do %>
-                      <span id="streaming-message"><%= @message.content %></span>
-                    <% else %>
-                      <%= @message.content %>
-                    <% end %>
-                    <%= if @message.role == "user" do %>
-                      <.user-controls />
-                    <% end %>
-                  </div>
+                  <%= if @message.role == "user" && @message.id == @edit_msg_id do %>
+                    <div class="w-full bg-base-200 dark:bg-base-300 rounded-xl p-4">
+                      <form phx-submit="save_edit">
+                        <textarea
+                          id={"edit-textarea-#{@message.id}"}
+                          name="edit-textarea"
+                          class="w-full bg-transparent resize-none focus:outline-none min-h-[100px]"
+                          phx-hook="MsgEditAutosize"
+                          phx-value-id={@message.id}
+                        ><%= @message.content %></textarea>
+                        <div class="flex justify-end gap-2 mt-2">
+                          <button
+                            type="button"
+                            phx-click="cancel_edit"
+                            phx-value-id={@message.id}
+                            class="btn btn-sm btn-outline"
+                          >
+                            Cancel
+                          </button>
+                          <button type="submit" class="btn btn-sm btn-primary">
+                            Save
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  <% else %>
+                    <div class={"relative rounded-3xl px-5 py-2.5 #{if @message.role == "assistant", do: "bg-[#f4f4f4] dark:bg-base-300 max-w-full md:max-w-3xl lg:max-w-2xl", else: "bg-[#f4f4f4] dark:bg-base-300 max-w-[70%] self-end"}"}>
+                      <%= if @is_streamed do %>
+                        <span id="streaming-message"><%= @message.content %></span>
+                      <% else %>
+                        <%= @message.content %>
+                      <% end %>
+                      <%= if @message.role == "user" do %>
+                        <.user-edit message_id={@message.id} />
+                      <% end %>
+                    </div>
+                  <% end %>
                 </div>
                 <%= if @message.attachments && length(@message.attachments) > 0 do %>
                   <div class="mt-2 space-y-2 w-full">

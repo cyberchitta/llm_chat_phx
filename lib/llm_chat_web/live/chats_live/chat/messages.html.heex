@@ -4,9 +4,20 @@
     message={message}
     is_streamed={false}
     sibling_info={message.sibling_info}
+    edit_msg_id={@uistate.edit_msg_id}
   />
 <% end %>
 <%= if @uistate.streaming do %>
-  <.message id="current-request" message={@uistate.streaming.user} is_streamed={false} />
-  <.message id="current-response" message={@uistate.streaming.assistant} is_streamed={true} />
+  <.message
+    id="current-request"
+    message={@uistate.streaming.user}
+    is_streamed={false}
+    edit_msg_id={@uistate.edit_msg_id}
+  />
+  <.message
+    id="current-response"
+    message={@uistate.streaming.assistant}
+    is_streamed={true}
+    edit_msg_id={@uistate.edit_msg_id}
+  />
 <% end %>

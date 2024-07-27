@@ -43,4 +43,8 @@ defmodule LlmChatWeb.UiState do
     content = assistant.content
     %{streaming | assistant: %{assistant | content: content <> chunk}}
   end
+
+  def with_edit(main, edit_msg_id) do
+    %{main | uistate: %{main.uistate | edit_msg_id: edit_msg_id}}
+  end
 end

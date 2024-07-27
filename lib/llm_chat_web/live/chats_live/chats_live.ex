@@ -66,6 +66,18 @@ defmodule LlmChatWeb.ChatsLive do
     chat_cancel_upload(params, socket)
   end
 
+  def handle_event("edit_message", %{"id" => message_id} = params, socket) do
+    useredit_begin(params, socket)
+  end
+
+  def handle_event("cancel_edit", _params, socket) do
+    useredit_cancel(socket)
+  end
+
+  def handle_event("save_edit", %{"edit-textarea" => content} = params, socket) do
+    useredit_save(params, socket)
+  end
+
   def handle_info({:cancel_pid, pid}, socket) do
     streamer_with_cancel_pid(pid, socket)
   end
@@ -164,6 +176,23 @@ defmodule LlmChatWeb.ChatsLive do
     else
       {[], socket}
     end
+  end
+
+  defp useredit_begin(%{"id" => message_id}, socket) do
+    {:noreply, assign(socket, main: UiState.with_edit(socket.assigns.main, message_id))}
+  end
+
+  defp useredit_cancel(socket) do
+    {:noreply, assign(socket, main: UiState.with_edit(socket.assigns.main, ""))}
+  end
+
+  defp useredit_save() do
+    main = socket.assigns.main
+    message_id = main.uistate.edit_msg_id
+    original_message = Enum.find(main.messages, &(&1.id == message_id))
+    attachments = original_message.attachments
+    upd_socket = socket |> assign(main: main |> UiState.with_edit(""))
+    {attachments, upd_socket} |> chat_submit(content)
   end
 
   defp streamer_cancel(socket) do
