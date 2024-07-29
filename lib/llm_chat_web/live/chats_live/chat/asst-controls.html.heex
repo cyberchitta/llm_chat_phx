@@ -1,6 +1,10 @@
 <div class="mt-1 flex gap-3 empty:hidden juice:-ml-3">
   <div class="items-center justify-start rounded-xl p-1 z-10 -mt-1 bg-token-main-surface-primary md:absolute md:border md:border-token-border-light md:hidden group-hover:block">
     <div class="flex items-center">
+      <.msg-navigator
+        sibling_info={if Map.has_key?(assigns, :sibling_info), do: @sibling_info}
+        message_id={@message_id}
+      />
       <span class="" data-state="closed">
         <button class="rounded-lg text-token-text-secondary hover:bg-token-main-surface-secondary">
           <span class="flex h-[30px] w-[30px] items-center justify-center">

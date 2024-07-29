@@ -1,4 +1,4 @@
-<%= if @sibling_info do %>
+<%= if @sibling_info && @sibling_info.total > 1  do %>
   <div class="flex items-center space-x-2 text-sm text-base-content/70">
     <button
       phx-click="navigate_sibling"

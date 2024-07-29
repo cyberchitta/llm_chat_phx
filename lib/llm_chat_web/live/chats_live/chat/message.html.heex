@@ -88,14 +88,17 @@
               </div>
             </div>
             <%= unless @is_streamed do %>
-              <div class="mt-1 flex items-center justify-start">
-                <.msg-navigator
-                  sibling_info={if Map.has_key?(assigns, :sibling_info), do: @sibling_info}
-                  chat_id={@message.chat_id}
-                  message_id={@message.id}
-                />
-                <%= if @message.role == "assistant" do %>
-                  <.asst-controls />
+              <div class={"mt-1 flex items-center #{if @message.role == "user", do: "justify-end", else: "justify-start"}"}>
+                <%= if @message.role == "user" do %>
+                  <.msg-navigator
+                    sibling_info={if Map.has_key?(assigns, :sibling_info), do: @sibling_info}
+                    message_id={@message.id}
+                  />
+                <% else %>
+                  <.asst-controls
+                    sibling_info={if Map.has_key?(assigns, :sibling_info), do: @sibling_info}
+                    message_id={@message.id}
+                  />
                 <% end %>
               </div>
             <% end %>
