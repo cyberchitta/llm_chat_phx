@@ -78,6 +78,10 @@ defmodule LlmChatWeb.ChatsLive do
     useredit_save(params, socket)
   end
 
+  def handle_event("navigate_sibling", %{"direction" => _, "message-id" => _} = params, socket) do
+    msg_navigator_sibling(params, socket)
+  end
+
   def handle_info({:cancel_pid, pid}, socket) do
     streamer_with_cancel_pid(pid, socket)
   end
@@ -195,6 +199,22 @@ defmodule LlmChatWeb.ChatsLive do
     attachments = message.attachments
     upd_socket = socket |> assign(main: updated_main)
     {attachments, upd_socket} |> chat_submit(content)
+  end
+
+  defp msg_navigator_sibling(%{"direction" => direction, "message-id" => message_id}, socket) do
+    main = socket.assigns.main
+    message = Enum.find(main.messages, &(&1.id == message_id))
+    sibling_info = message.sibling_info
+
+    sib_idx =
+      case direction do
+        "prev" -> max(1, sibling_info.current - 1)
+        "next" -> min(sibling_info.total, sibling_info.current + 1)
+      end
+
+    sibling_id = Enum.at(sibling_info.sibling_ids, sib_idx - 1)
+    path = Chat.get_leftmost_path(main.chat.id, sibling_id)
+    {:noreply, assign(socket, main: main |> UiState.with_ui_path(path))}
   end
 
   defp streamer_cancel(socket) do
