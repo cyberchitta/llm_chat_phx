@@ -9,8 +9,7 @@ defmodule LlmChatWeb.UiState do
   end
 
   def index(user_email, chat_id) when is_binary(chat_id) do
-    main = Chat.details(chat_id)
-    index(user_email, main |> Map.put(:uistate, uistate(main.chat.ui_path, "")))
+    index(user_email, chat_id, Chat.ui_path(chat_id))
   end
 
   def index(user_email, %{} = main) do
@@ -20,6 +19,11 @@ defmodule LlmChatWeb.UiState do
       sidebar_open: true,
       user: User.get_by_email(user_email)
     }
+  end
+
+  def index(user_email, chat_id, ui_path) when is_binary(chat_id) and is_binary(ui_path) do
+    main = Chat.details(chat_id, ui_path)
+    index(user_email, main |> Map.put(:uistate, uistate(ui_path, "")))
   end
 
   def sidebar(user_email) do
@@ -46,5 +50,9 @@ defmodule LlmChatWeb.UiState do
 
   def with_edit(main, edit_msg_id) do
     %{main | uistate: %{main.uistate | edit_msg_id: edit_msg_id}}
+  end
+
+  def with_ui_path(main, ui_path) do
+    main |> Map.merge(Chat.details(main.chat.id, ui_path))
   end
 end

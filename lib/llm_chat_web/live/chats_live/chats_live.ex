@@ -66,15 +66,15 @@ defmodule LlmChatWeb.ChatsLive do
     chat_cancel_upload(params, socket)
   end
 
-  def handle_event("edit_message", %{"id" => message_id} = params, socket) do
+  def handle_event("edit_message", %{"id" => _} = params, socket) do
     useredit_begin(params, socket)
   end
 
-  def handle_event("cancel_edit", _params, socket) do
+  def handle_event("cancel_edit", _, socket) do
     useredit_cancel(socket)
   end
 
-  def handle_event("save_edit", %{"edit-textarea" => content} = params, socket) do
+  def handle_event("save_edit", %{"edit-textarea" => _} = params, socket) do
     useredit_save(params, socket)
   end
 
@@ -186,12 +186,14 @@ defmodule LlmChatWeb.ChatsLive do
     {:noreply, assign(socket, main: UiState.with_edit(socket.assigns.main, ""))}
   end
 
-  defp useredit_save() do
+  defp useredit_save(%{"edit-textarea" => content}, socket) do
     main = socket.assigns.main
     message_id = main.uistate.edit_msg_id
-    original_message = Enum.find(main.messages, &(&1.id == message_id))
-    attachments = original_message.attachments
-    upd_socket = socket |> assign(main: main |> UiState.with_edit(""))
+    message = Enum.find(main.messages, &(&1.id == message_id))
+    parent_path = Chat.parent_path(message.path)
+    updated_main = main |> UiState.with_ui_path(parent_path)
+    attachments = message.attachments
+    upd_socket = socket |> assign(main: updated_main)
     {attachments, upd_socket} |> chat_submit(content)
   end
 

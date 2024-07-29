@@ -53,23 +53,42 @@ defmodule LlmChat.Contexts.Chat do
     |> update!()
   end
 
-  def details(chat_id) do
+  def ui_path(chat_id) do
+    Chat |> get!(chat_id) |> Map.get(:ui_path)
+  end
+
+  def details(chat_id, ui_path) do
     %{
       chat: Chat |> get(chat_id),
       messages:
         chat_id
-        |> get_ui_thread()
+        |> get_ui_thread(ui_path)
         |> Enum.map(&Map.put(&1, :sibling_info, get_sibling_info(chat_id, &1)))
     }
   end
 
   def add_message!(%{parent_id: nil} = attrs) do
-    attrs |> Map.put(:path, to_string(attrs.turn_number)) |> insert_message!()
+    attrs |> Map.put(:path, msg_path(nil, attrs.turn_number)) |> insert_message!()
   end
 
   def add_message!(%{parent_id: parent_id} = attrs) do
     parent_path = Message |> get_by(id: parent_id) |> Map.get(:path)
-    attrs |> Map.put(:path, "#{parent_path}.#{attrs.turn_number}") |> insert_message!()
+    attrs |> Map.put(:path, msg_path(parent_path, attrs.turn_number)) |> insert_message!()
+  end
+
+  def parent_path(path) do
+    case :binary.split(path, ".", [:global, :trim]) do
+      [] -> ""
+      parts -> parts |> Enum.reverse() |> tl |> Enum.reverse() |> Enum.join(".")
+    end
+  end
+
+  def msg_path(parent_path, turn_number) when is_nil(parent_path) do
+    "#{turn_number}"
+  end
+
+  def msg_path(parent_path, turn_number) do
+    "#{parent_path}.#{turn_number}"
   end
 
   defp insert_message!(attrs) do
@@ -114,9 +133,7 @@ defmodule LlmChat.Contexts.Chat do
   defp where_parent_id_is(query, nil), do: where(query, [m], is_nil(m.parent_id))
   defp where_parent_id_is(query, parent_id), do: where(query, [m], m.parent_id == ^parent_id)
 
-  defp get_ui_thread(chat_id) do
-    path = Chat |> get!(chat_id) |> Map.get(:ui_path)
-
+  defp get_ui_thread(chat_id, path) do
     Message
     |> where(chat_id: ^chat_id)
     |> where([m], fragment("? = ? OR starts_with(?, ? || '.')", m.path, ^path, ^path, m.path))
