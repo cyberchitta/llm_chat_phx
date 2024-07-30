@@ -3,7 +3,7 @@ defmodule LlmChat.Repo.Postgres.Migrations.CreateMessages do
 
   def change do
     create table(:messages, primary_key: false) do
-      add(:id, :uuid, primary_key: true, default:  Ecto.UUID.generate())
+      add(:id, :uuid, primary_key: true, default: Ecto.UUID.generate())
       add(:turn_number, :integer, null: false)
       add(:path, :text, null: false, default: "")
       add(:role, :string, null: false)

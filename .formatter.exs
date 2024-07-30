@@ -4,6 +4,6 @@
   inputs: [
     "*.{heex,ex,exs}",
     "{config,lib,test}/**/*.{heex,ex,exs}",
-    "priv/repo/migrations/*.{ex}"
+    "priv/repo/postgres/migrations/*.{exs}"
   ]
 ]
