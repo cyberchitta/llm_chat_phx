@@ -21,7 +21,7 @@ defmodule LlmChatWeb.UiState do
     }
   end
 
-  def index(user_email, chat_id, ui_path) when is_binary(chat_id) and is_binary(ui_path) do
+  def index(user_email, chat_id, ui_path) when is_binary(chat_id) do
     main = Chat.details(chat_id, ui_path)
     index(user_email, main |> Map.put(:uistate, uistate(ui_path, "")))
   end
