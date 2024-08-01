@@ -92,18 +92,15 @@ defmodule LlmChat.Contexts.Chat do
   end
 
   defp insert_message!(attrs) do
-    {:ok, result} =
-      transaction(fn ->
-        attachments = Enum.map(attrs.attachments, &Map.take(&1, [:url, :content_type, :filename]))
-        msg = %Message{} |> Message.changeset(%{attrs | attachments: attachments}) |> insert!()
-        update_max_turn_number!(msg.chat_id, msg.turn_number)
-        msg
-      end)
+    attachments = Enum.map(attrs.attachments, &Map.take(&1, [:url, :content_type, :filename]))
 
-    result
+    %Message{}
+    |> Message.changeset(%{attrs | attachments: attachments})
+    |> insert!()
+    |> LlmChat.RepoPostgres.preload(:feedback)
   end
 
-  defp update_max_turn_number!(chat_id, turn_number) do
+  def update_max_turn_number!(chat_id, turn_number) do
     from(c in Chat, where: c.id == ^chat_id)
     |> Ecto.Query.update(
       set: [max_turn_number: fragment("GREATEST(max_turn_number, ?)", ^turn_number)]
@@ -138,6 +135,7 @@ defmodule LlmChat.Contexts.Chat do
     |> where(chat_id: ^chat_id)
     |> where([m], fragment("? = ? OR starts_with(?, ? || '.')", m.path, ^path, ^path, m.path))
     |> order_by([m], m.turn_number)
+    |> Ecto.Query.preload(:feedback)
     |> all()
   end
 

@@ -3,7 +3,7 @@
     <div class="flex items-center">
       <.msg-navigator
         sibling_info={if Map.has_key?(assigns, :sibling_info), do: @sibling_info}
-        message_id={@message_id}
+        message_id={@message.id}
       />
       <span class="" data-state="closed">
         <button class="rounded-lg text-token-text-secondary hover:bg-token-main-surface-secondary">
@@ -19,11 +19,36 @@
           </span>
         </button>
       </span>
-      <div class="flex">
+      <div class="flex items-center">
         <span class="" data-state="closed">
-          <button class="rounded-lg text-token-text-secondary hover:bg-token-main-surface-secondary">
+          <button
+            phx-click="set_feedback"
+            phx-value-id={@message.id}
+            phx-value-feedback="like"
+            class="rounded-lg text-token-text-secondary hover:bg-token-main-surface-secondary"
+          >
             <span class="flex h-[30px] w-[30px] items-center justify-center">
-              <.icon name="hero-hand-thumb-down" class="w-4 h-4" />
+              <%= if @message.feedback && @message.feedback.type == "like" do %>
+                <.icon name="hero-hand-thumb-up-solid" class="w-4 h-4 text-primary" />
+              <% else %>
+                <.icon name="hero-hand-thumb-up" class="w-4 h-4" />
+              <% end %>
+            </span>
+          </button>
+        </span>
+        <span class="" data-state="closed">
+          <button
+            phx-click="set_feedback"
+            phx-value-id={@message.id}
+            phx-value-feedback="dislike"
+            class="rounded-lg text-token-text-secondary hover:bg-token-main-surface-secondary"
+          >
+            <span class="flex h-[30px] w-[30px] items-center justify-center">
+              <%= if @message.feedback && @message.feedback.type == "dislike" do %>
+                <.icon name="hero-hand-thumb-down-solid" class="w-4 h-4 text-error" />
+              <% else %>
+                <.icon name="hero-hand-thumb-down" class="w-4 h-4" />
+              <% end %>
             </span>
           </button>
         </span>

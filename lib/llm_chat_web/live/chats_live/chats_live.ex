@@ -5,7 +5,7 @@ defmodule LlmChatWeb.ChatsLive do
 
   import LlmChatWeb.Live.ChatsLive.Html
 
-  alias LlmChat.Contexts.Chat
+  alias LlmChat.Contexts.{Chat, Feedback}
   alias LlmChat.Files
   alias LlmChatWeb.UiState
 
@@ -80,6 +80,10 @@ defmodule LlmChatWeb.ChatsLive do
 
   def handle_event("navigate_sibling", %{"direction" => _, "message-id" => _} = params, socket) do
     msg_navigator_sibling(params, socket)
+  end
+
+  def handle_event("set_feedback", %{"id" => _, "feedback" => _} = params, socket) do
+    assistant_set_feedback(params, socket)
   end
 
   def handle_info({:cancel_pid, pid}, socket) do
@@ -201,6 +205,21 @@ defmodule LlmChatWeb.ChatsLive do
     {attachments, upd_socket} |> chat_submit(content)
   end
 
+  def assistant_set_feedback(%{"id" => msg_id, "feedback" => feedback_type}, socket) do
+    case Feedback.get_feedback(msg_id) do
+      nil -> {:ok, _} = Feedback.upsert(%{message_id: msg_id, type: feedback_type})
+      %{type: ^feedback_type} -> Feedback.delete_feedback(msg_id)
+      _ -> {:ok, _} = Feedback.upsert(%{message_id: msg_id, type: feedback_type})
+    end
+
+    updated_messages =
+      Enum.map(socket.assigns.main.messages, fn m ->
+        if m.id == msg_id, do: %{m | feedback: Feedback.get_feedback(msg_id)}, else: m
+      end)
+
+    {:noreply, assign(socket, main: %{socket.assigns.main | messages: updated_messages})}
+  end
+
   defp msg_navigator_sibling(%{"direction" => direction, "message-id" => message_id}, socket) do
     main = socket.assigns.main
     message = Enum.find(main.messages, &(&1.id == message_id))
@@ -248,6 +267,7 @@ defmodule LlmChatWeb.ChatsLive do
 
     user_msg = Chat.add_message!(user)
     asst_msg = Chat.add_message!(asst |> Map.put(:parent_id, user_msg.id))
+    Chat.update_max_turn_number!(user.chat_id, asst_msg.turn_number)
     Chat.update_ui_path!(user.chat_id, asst_msg.path)
     next_messages = main.messages ++ [user_msg, asst_msg]
     next_main = %{main | messages: next_messages}
@@ -272,9 +292,10 @@ defmodule LlmChatWeb.ChatsLive do
   end
 
   defp sidebar_delete_chat(%{"id" => chat_id}, socket) do
+    chat = get_in(socket.assigns, [:main, :chat])
     Chat.delete(chat_id)
 
-    if get_in(socket.assigns, [:main, :chat, :id]) == chat_id do
+    if !is_nil(chat) && chat.id == chat_id do
       {:noreply, socket |> push_navigate(to: ~p"/chats")}
     else
       {:noreply, assign(socket, :sidebar, UiState.sidebar(socket.assigns.user_email))}

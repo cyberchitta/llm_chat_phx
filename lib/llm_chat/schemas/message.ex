@@ -14,6 +14,8 @@ defmodule LlmChat.Schemas.Message do
 
     field(:sibling_info, :map, virtual: true)
 
+    has_one(:feedback, LlmChat.Schemas.Feedback)
+
     belongs_to(:chat, LlmChat.Schemas.Chat, foreign_key: :chat_id, type: Ecto.UUID)
     belongs_to(:parent, LlmChat.Schemas.Message, foreign_key: :parent_id, type: Ecto.UUID)
 

@@ -97,7 +97,7 @@
                 <% else %>
                   <.asst-controls
                     sibling_info={if Map.has_key?(assigns, :sibling_info), do: @sibling_info}
-                    message_id={@message.id}
+                    message={@message}
                   />
                 <% end %>
               </div>
