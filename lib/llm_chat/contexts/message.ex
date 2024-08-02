@@ -11,7 +11,8 @@ defmodule LlmChat.Contexts.Message do
 
   def add_message!(%{parent_id: parent_id} = attrs) do
     parent_path = Message |> get_by(id: parent_id) |> Map.get(:path)
-    attrs |> Map.put(:path, Conversation.msg_path(parent_path, attrs.turn_number)) |> insert_message!()
+    msg_path = Conversation.msg_path(parent_path, attrs.turn_number)
+    attrs |> Map.put(:path, msg_path) |> insert_message!()
   end
 
   defp insert_message!(attrs) do
