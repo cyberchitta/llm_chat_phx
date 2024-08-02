@@ -5,7 +5,7 @@ defmodule LlmChatWeb.ChatsLive do
 
   import LlmChatWeb.Live.ChatsLive.Html
 
-  alias LlmChat.Contexts.{Chat, Feedback}
+  alias LlmChat.Contexts.{Chat, Message, Conversation, Feedback}
   alias LlmChat.Files
   alias LlmChatWeb.UiState
 
@@ -155,12 +155,12 @@ defmodule LlmChatWeb.ChatsLive do
     turn_number = main.chat.max_turn_number + 1
 
     parent_id = if Enum.empty?(messages), do: nil, else: List.last(messages).id
-    msg_u = Chat.msg(chat_id, parent_id, turn_number)
-    msg_a = Chat.msg(chat_id, nil, turn_number + 1)
+    msg_u = Message.msg(chat_id, parent_id, turn_number)
+    msg_a = Message.msg(chat_id, nil, turn_number + 1)
 
     %{
-      user: msg_u |> Chat.with_content(prompt, attachments) |> Chat.to_user(),
-      assistant: msg_a |> Chat.with_content() |> Chat.to_assistant(),
+      user: msg_u |> Message.with_content(prompt, attachments) |> Message.to_user(),
+      assistant: msg_a |> Message.with_content() |> Message.to_assistant(),
       cancel_pid: nil
     }
   end
@@ -198,7 +198,7 @@ defmodule LlmChatWeb.ChatsLive do
     main = socket.assigns.main
     message_id = main.uistate.edit_msg_id
     message = Enum.find(main.messages, &(&1.id == message_id))
-    parent_path = Chat.parent_path(message.path)
+    parent_path = Conversation.parent_path(message.path)
     updated_main = main |> UiState.with_ui_path(parent_path)
     attachments = message.attachments
     upd_socket = socket |> assign(main: updated_main)
@@ -232,7 +232,7 @@ defmodule LlmChatWeb.ChatsLive do
       end
 
     sibling_id = Enum.at(sibling_info.sibling_ids, sib_idx - 1)
-    path = Chat.get_leftmost_path(main.chat.id, sibling_id)
+    path = Conversation.get_leftmost_path(main.chat.id, sibling_id)
     {:noreply, assign(socket, main: main |> UiState.with_ui_path(path))}
   end
 
@@ -265,10 +265,10 @@ defmodule LlmChatWeb.ChatsLive do
     user = streaming.user
     asst = streaming.assistant
 
-    user_msg = Chat.add_message!(user)
-    asst_msg = Chat.add_message!(asst |> Map.put(:parent_id, user_msg.id))
+    user_msg = Message.add_message!(user)
+    asst_msg = Message.add_message!(asst |> Map.put(:parent_id, user_msg.id))
     Chat.update_max_turn_number!(user.chat_id, asst_msg.turn_number)
-    Chat.update_ui_path!(user.chat_id, asst_msg.path)
+    Conversation.update_current_path!(user.chat_id, asst_msg.path)
     next_messages = main.messages ++ [user_msg, asst_msg]
     next_main = %{main | messages: next_messages}
     {:noreply, assign(socket, main: next_main |> UiState.with_streaming())}

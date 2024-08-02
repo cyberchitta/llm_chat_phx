@@ -1,6 +1,6 @@
 defmodule LlmChatWeb.UiState do
   @moduledoc false
-  alias LlmChat.Contexts.{Chat, User, Suggestion}
+  alias LlmChat.Contexts.{Chat, Conversation, User, Suggestion}
 
   def index(user_email) do
     suggestions = Suggestion.get_default()
@@ -9,7 +9,7 @@ defmodule LlmChatWeb.UiState do
   end
 
   def index(user_email, chat_id) when is_binary(chat_id) do
-    index(user_email, chat_id, Chat.ui_path(chat_id))
+    index(user_email, chat_id, Conversation.current_path(chat_id))
   end
 
   def index(user_email, %{} = main) do
