@@ -83,7 +83,7 @@ defmodule LlmChatWeb.ChatsLive do
   end
 
   def handle_event("set_feedback", %{"id" => _, "feedback" => _} = params, socket) do
-    assistant_set_feedback(params, socket)
+    asst_ctrls_feedback(params, socket)
   end
 
   def handle_info({:cancel_pid, pid}, socket) do
@@ -205,7 +205,7 @@ defmodule LlmChatWeb.ChatsLive do
     {attachments, upd_socket} |> chat_submit(content)
   end
 
-  def assistant_set_feedback(%{"id" => msg_id, "feedback" => feedback_type}, socket) do
+  def asst_ctrls_feedback(%{"id" => msg_id, "feedback" => feedback_type}, socket) do
     case Feedback.get_feedback(msg_id) do
       nil -> {:ok, _} = Feedback.upsert(%{message_id: msg_id, type: feedback_type})
       %{type: ^feedback_type} -> Feedback.delete_feedback(msg_id)
