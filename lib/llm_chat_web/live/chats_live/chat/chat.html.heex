@@ -2,11 +2,13 @@
   <.header main={@main} user={@user} sidebar_open={@sidebar_open} />
   <main class="flex-1 overflow-auto">
     <div id="messageContainer" phx-hook="ChatAutoScroll" class="h-full overflow-y-auto p-4">
-      <%= if get_in(@main, [:chat]) do %>
-        <.messages messages={@main.messages} uistate={@main.uistate} />
-      <% else %>
-        <.hello suggestions={@main.suggestions} />
-      <% end %>
+      <div id="clipboard-handler" phx-hook="Clipboard">
+        <%= if get_in(@main, [:chat]) do %>
+          <.messages messages={@main.messages} uistate={@main.uistate} />
+        <% else %>
+          <.hello suggestions={@main.suggestions} />
+        <% end %>
+      </div>
     </div>
   </main>
   <footer class="sticky bottom-0 bg-base-100 p-3">

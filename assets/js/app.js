@@ -28,6 +28,7 @@ import SidebarToggle from "./sidebar_toggle";
 import ChatItemMenu from "./chat_item_menu";
 import FilePreview from "./file_preview";
 import MsgEditAutosize from "./msg_edit_autosize";
+import Clipboard from "./clipboard";
 
 let Hooks = {};
 
@@ -37,6 +38,7 @@ Hooks.SidebarToggle = SidebarToggle;
 Hooks.ChatItemMenu = ChatItemMenu;
 Hooks.FilePreview = FilePreview;
 Hooks.MsgEditAutosize = MsgEditAutosize;
+Hooks.Clipboard = Clipboard;
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")

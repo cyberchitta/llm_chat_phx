@@ -13,7 +13,11 @@
         </button>
       </span>
       <span class="" data-state="closed">
-        <button class="rounded-lg text-token-text-secondary hover:bg-token-main-surface-secondary">
+        <button
+          type="button"
+          class="rounded-lg text-token-text-secondary hover:bg-token-main-surface-secondary copy-message-btn"
+          data-content={Phoenix.HTML.Safe.to_iodata(@message.content)}
+        >
           <span class="flex h-[30px] w-[30px] items-center justify-center">
             <.icon name="hero-document-duplicate" class="w-4 h-4" />
           </span>
