@@ -65,9 +65,11 @@
                   <% else %>
                     <div class={"relative rounded-3xl px-5 py-2.5 #{if @message.role == "assistant", do: "bg-[#f4f4f4] dark:bg-base-300 max-w-full md:max-w-3xl lg:max-w-2xl", else: "bg-[#f4f4f4] dark:bg-base-300 max-w-[70%] self-end"}"}>
                       <%= if @is_streamed do %>
-                        <span id="streaming-message"><%= @message.content %></span>
+                        <span id="streaming-message">
+                          <.maybe_markdown role={@message.role} content={@message.content} />
+                        </span>
                       <% else %>
-                        <%= @message.content %>
+                        <.maybe_markdown role={@message.role} content={@message.content} />
                       <% end %>
                       <%= if @message.role == "user" do %>
                         <.user-edit message_id={@message.id} />

@@ -1,0 +1,5 @@
+<%= if @role == "assistant" do %>
+  <%= raw(LlmChat.Contexts.Markdown.to_html(@content)) %>
+<% else %>
+  <%= @content %>
+<% end %>
