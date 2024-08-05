@@ -6,7 +6,12 @@
         message_id={@message.id}
       />
       <span class="" data-state="closed">
-        <button class="rounded-lg text-token-text-secondary hover:bg-token-main-surface-secondary">
+        <button
+          type="button"
+          id={"audio-button-#{@message.id}"}
+          phx-hook="PlayAudio"
+          class="rounded-lg text-token-text-secondary hover:bg-token-main-surface-secondary"
+        >
           <span class="flex h-[30px] w-[30px] items-center justify-center">
             <.icon name="hero-speaker-wave" class="w-4 h-4" />
           </span>

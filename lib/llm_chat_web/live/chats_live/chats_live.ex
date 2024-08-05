@@ -86,6 +86,10 @@ defmodule LlmChatWeb.ChatsLive do
     asst_ctrls_feedback(params, socket)
   end
 
+  def handle_event("narrate", %{"message_id" => _} = params, socket) do
+    asst_ctrls_narrate(params, socket)
+  end
+
   def handle_info({:cancel_pid, pid}, socket) do
     streamer_with_cancel_pid(pid, socket)
   end
@@ -100,6 +104,14 @@ defmodule LlmChatWeb.ChatsLive do
 
   def handle_info({:submit_prompt, prompt}, socket) do
     chat_submit_existing(prompt, [], socket)
+  end
+
+  def handle_info({:audio_ready, message_id, audio_content}, socket) do
+    asst_ctrls_narrate_ready(message_id, audio_content, socket)
+  end
+
+  def handle_info({:audio_error, message_id, reason}, socket) do
+    asst_ctrls_narrate_error(message_id, reason, socket)
   end
 
   def handle_info(message, socket) do
@@ -218,6 +230,21 @@ defmodule LlmChatWeb.ChatsLive do
       end)
 
     {:noreply, assign(socket, main: %{socket.assigns.main | messages: updated_messages})}
+  end
+
+  defp asst_ctrls_narrate(%{"message_id" => message_id}, socket) do
+    message = Enum.find(socket.assigns.main.messages, &(&1.id == message_id))
+    LlmChat.Llm.Audio.initiate_tts(self(), message_id, message.content)
+    {:noreply, socket}
+  end
+
+  defp asst_ctrls_narrate_ready(message_id, audio_content, socket) do
+    narr_json = %{audio_content: Base.encode64(audio_content), message_id: message_id}
+    {:noreply, socket |> push_event("audio_ready", narr_json)}
+  end
+
+  defp asst_ctrls_narrate_error(message_id, reason, socket) do
+    {:noreply, socket |> push_event("audio_error", %{message_id: message_id, reason: reason})}
   end
 
   defp msg_navigator_sibling(%{"direction" => direction, "message-id" => message_id}, socket) do
