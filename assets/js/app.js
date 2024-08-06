@@ -30,6 +30,7 @@ import FilePreview from "./file_preview";
 import MsgEditAutosize from "./msg_edit_autosize";
 import Clipboard from "./clipboard";
 import PlayAudio from './play_audio';
+import RecordAudio from './record_audio';
 
 let Hooks = {};
 
@@ -41,6 +42,7 @@ Hooks.FilePreview = FilePreview;
 Hooks.MsgEditAutosize = MsgEditAutosize;
 Hooks.Clipboard = Clipboard;
 Hooks.PlayAudio = PlayAudio;
+Hooks.RecordAudio = RecordAudio;
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")

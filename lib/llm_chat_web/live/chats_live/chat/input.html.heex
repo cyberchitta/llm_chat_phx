@@ -91,6 +91,9 @@
                   ><%= get_in(@main, [:uistate, :suggestion]) %></textarea>
                 </div>
                 <button
+                  type="button"
+                  id="audio-record-button"
+                  phx-hook="RecordAudio"
                   class="flex items-center justify-center text-base-content h-10 w-10 dark:text-white rounded-full focus-visible:outline-black dark:focus-visible:outline-white mb-1 ml-1.5"
                   aria-disabled="false"
                 >

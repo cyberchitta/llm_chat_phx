@@ -90,6 +90,14 @@ defmodule LlmChatWeb.ChatsLive do
     asst_ctrls_narrate(params, socket)
   end
 
+  def handle_event(
+        "whisper",
+        %{"audio_data" => _, "message_id" => _, "content_type" => _} = params,
+        socket
+      ) do
+    input_whisper(params, socket)
+  end
+
   def handle_info({:cancel_pid, pid}, socket) do
     streamer_with_cancel_pid(pid, socket)
   end
@@ -112,6 +120,14 @@ defmodule LlmChatWeb.ChatsLive do
 
   def handle_info({:audio_error, message_id, reason}, socket) do
     asst_ctrls_narrate_error(message_id, reason, socket)
+  end
+
+  def handle_info({:transcript_ready, message_id, transcript}, socket) do
+    input_whisper_ready(message_id, transcript, socket)
+  end
+
+  def handle_info({:transcript_error, message_id, reason}, socket) do
+    input_whisper_error(message_id, reason, socket)
   end
 
   def handle_info(message, socket) do
@@ -245,6 +261,26 @@ defmodule LlmChatWeb.ChatsLive do
 
   defp asst_ctrls_narrate_error(message_id, reason, socket) do
     {:noreply, socket |> push_event("audio_error", %{message_id: message_id, reason: reason})}
+  end
+
+  def input_whisper(
+        %{"audio_data" => audio_data, "message_id" => message_id, "content_type" => content_type},
+        socket
+      ) do
+    LlmChat.Llm.Audio.initiate_transcription(self(), message_id, audio_data, content_type)
+    {:noreply, socket}
+  end
+
+  def input_whisper_ready(message_id, transcript, socket) do
+    {:noreply,
+     push_event(socket, "transcription_ready", %{message_id: message_id, text: transcript})}
+  end
+
+  def input_whisper_error(message_id, reason, socket) do
+    {:noreply,
+     socket
+     |> put_flash(:error, "Transcription failed: #{inspect(reason)}")
+     |> push_event("transcription_error", %{message_id: message_id, reason: inspect(reason)})}
   end
 
   defp msg_navigator_sibling(%{"direction" => direction, "message-id" => message_id}, socket) do
