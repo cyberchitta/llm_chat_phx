@@ -1,26 +1,28 @@
 defmodule LlmChat.Contexts.LlmPreset do
   @presets [
     %{
-      name: "GPT-4 Default",
+      name: "gpt4_default",
       provider: %{
         "name" => "OpenAI",
         "base_url" => "https://api.openai.com/v1"
       },
       model: "gpt-4",
       settings: %{
+        "display_name" => "GPT-4 Default",
         "system_prompt" => "You are a helpful assistant.",
         "max_tokens" => 2000,
         "temperature" => 0.7
       }
     },
     %{
-      name: "GPT-3.5 Turbo",
+      name: "gpt35_turbo",
       provider: %{
         "name" => "OpenAI",
         "base_url" => "https://api.openai.com/v1"
       },
       model: "gpt-3.5-turbo",
       settings: %{
+        "display_name" => "GPT-3.5 Turbo",
         "system_prompt" => "You are a friendly AI assistant.",
         "max_tokens" => 1000,
         "temperature" => 0.9
