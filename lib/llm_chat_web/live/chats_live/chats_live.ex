@@ -42,11 +42,11 @@ defmodule LlmChatWeb.ChatsLive do
     sidebar_to_index(socket)
   end
 
-  def handle_event("rename_chat", %{"id" => _, "new_name" => _} = params, socket) do
+  def handle_event("rename_chat", params, socket) do
     sidebar_rename_chat(params, socket)
   end
 
-  def handle_event("delete_chat", %{"id" => _} = params, socket) do
+  def handle_event("delete_chat", params, socket) do
     sidebar_delete_chat(params, socket)
   end
 
@@ -62,11 +62,11 @@ defmodule LlmChatWeb.ChatsLive do
     streamer_cancel(socket)
   end
 
-  def handle_event("cancel-upload", %{"ref" => _} = params, socket) do
+  def handle_event("cancel-upload", params, socket) do
     chat_cancel_upload(params, socket)
   end
 
-  def handle_event("edit_message", %{"id" => _} = params, socket) do
+  def handle_event("edit_message", params, socket) do
     useredit_begin(params, socket)
   end
 
@@ -74,27 +74,23 @@ defmodule LlmChatWeb.ChatsLive do
     useredit_cancel(socket)
   end
 
-  def handle_event("save_edit", %{"edit-textarea" => _} = params, socket) do
+  def handle_event("save_edit", params, socket) do
     useredit_save(params, socket)
   end
 
-  def handle_event("navigate_sibling", %{"direction" => _, "message-id" => _} = params, socket) do
+  def handle_event("navigate_sibling", params, socket) do
     msg_navigator_sibling(params, socket)
   end
 
-  def handle_event("set_feedback", %{"id" => _, "feedback" => _} = params, socket) do
+  def handle_event("set_feedback", params, socket) do
     asst_ctrls_feedback(params, socket)
   end
 
-  def handle_event("narrate", %{"message_id" => _} = params, socket) do
+  def handle_event("narrate", params, socket) do
     asst_ctrls_narrate(params, socket)
   end
 
-  def handle_event(
-        "whisper",
-        %{"audio_data" => _, "message_id" => _, "content_type" => _} = params,
-        socket
-      ) do
+  def handle_event("whisper", params, socket) do
     input_whisper(params, socket)
   end
 
