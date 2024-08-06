@@ -4,7 +4,7 @@ defmodule LlmChat.Llm.Chat do
   def initiate_stream(prompt, attachments) do
     openai = Application.get_env(:llm_chat, :openai_api_key) |> OpenaiEx.new()
     messages = Context.create_messages(prompt, attachments)
-    openai |> Client.stream(messages)
+    openai |> Client.chat_stream(messages)
   end
 
   def process_stream(receiver, stream) do
@@ -12,6 +12,6 @@ defmodule LlmChat.Llm.Chat do
   end
 
   def cancel_stream(cancel_pid) do
-    Client.cancel_stream(cancel_pid)
+    Client.cancel_chat_stream(cancel_pid)
   end
 end
