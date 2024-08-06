@@ -42,7 +42,6 @@ defmodule LlmChat.Llm.Audio do
       "audio/wav" -> ".wav"
       "audio/mpeg" -> ".mp3"
       "audio/mp4" -> ".mp4"
-      # fallback
       _ -> ".bin"
     end
   end
