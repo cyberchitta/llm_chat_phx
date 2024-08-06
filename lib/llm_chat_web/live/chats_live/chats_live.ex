@@ -94,6 +94,10 @@ defmodule LlmChatWeb.ChatsLive do
     input_whisper(params, socket)
   end
 
+  def handle_event("change_preset", params, socket) do
+    preset_dd(params, socket)
+  end
+
   def handle_info({:cancel_pid, pid}, socket) do
     streamer_with_cancel_pid(pid, socket)
   end
@@ -139,6 +143,11 @@ defmodule LlmChatWeb.ChatsLive do
 
   defp enable_gauth(socket) do
     socket |> assign(oauth_google_url: UserGauth.gauth_url())
+  end
+
+  def preset_dd(%{"preset_name" => preset_name}, socket) do
+    {:noreply,
+     assign(socket, :main, socket.assigns.main |> UiState.with_selected_preset(preset_name))}
   end
 
   defp chat_validate(_, socket) do

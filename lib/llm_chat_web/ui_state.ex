@@ -31,7 +31,26 @@ defmodule LlmChatWeb.UiState do
   end
 
   defp uistate(ui_path, suggestion) do
-    %{streaming: nil, ui_path: ui_path, suggestion: suggestion, edit_msg_id: ""}
+    presets = LlmChat.Contexts.LlmPreset.list()
+    default_preset = List.first(presets)
+    uistate(ui_path, suggestion, presets, default_preset.name)
+  end
+
+  defp uistate(ui_path, suggestion, presets, sel_preset_name) do
+    %{
+      streaming: nil,
+      ui_path: ui_path,
+      suggestion: suggestion,
+      edit_msg_id: "",
+      presets: presets,
+      sel_preset_name: sel_preset_name
+    }
+  end
+
+  def with_chunk(streaming, chunk) do
+    assistant = streaming.assistant
+    content = assistant.content
+    %{streaming | assistant: %{assistant | content: content <> chunk}}
   end
 
   def with_streaming(main, streaming \\ nil) do
@@ -42,14 +61,16 @@ defmodule LlmChatWeb.UiState do
     %{main | uistate: %{main.uistate | streaming: %{main.uistate.streaming | cancel_pid: pid}}}
   end
 
-  def with_chunk(streaming, chunk) do
-    assistant = streaming.assistant
-    content = assistant.content
-    %{streaming | assistant: %{assistant | content: content <> chunk}}
-  end
-
   def with_edit(main, edit_msg_id) do
     %{main | uistate: %{main.uistate | edit_msg_id: edit_msg_id}}
+  end
+
+  def with_presets(main, presets) do
+    %{main | uistate: %{main.uistate | presets: presets}}
+  end
+
+  def with_selected_preset(main, name) do
+    %{main | uistate: %{main.uistate | sel_preset_name: name}}
   end
 
   def with_ui_path(main, ui_path) do

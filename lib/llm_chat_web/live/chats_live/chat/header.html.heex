@@ -19,10 +19,12 @@
           </button>
         </span>
       <% end %>
-      <div class="flex items-center cursor-pointer rounded-xl py-2 px-3 text-lg font-semibold hover:bg-base-200">
-        ChatGPT <span class="text-base-content/70">4o</span>
-        <.icon name="hero-chevron-down" class="w-6 h-6 text-base-content/50" />
-      </div>
+      <.preset-selector
+        selected_preset={
+          @main.uistate.presets |> Enum.find(&(&1.name == @main.uistate.sel_preset_name))
+        }
+        presets={@main.uistate.presets}
+      />
     </div>
     <div class="flex gap-2">
       <%= if get_in(@main, [:chat]) do %>
