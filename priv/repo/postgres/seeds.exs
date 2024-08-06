@@ -33,19 +33,6 @@ end
       "max_tokens" => 1000,
       "temperature" => 0.9
     }
-  },
-  %{
-    name: "Claude 2",
-    provider: %{
-      "name" => "Anthropic",
-      "base_url" => "https://api.anthropic.com"
-    },
-    model: "claude-2",
-    settings: %{
-      "system_prompt" => "You are Claude, an AI assistant created by Anthropic.",
-      "max_tokens" => 100000,
-      "temperature" => 0.5
-    }
   }
 ]
 |> Enum.each(&insert_preset/1)
