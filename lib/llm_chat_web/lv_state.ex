@@ -40,7 +40,6 @@ defmodule LlmChatWeb.LvState do
     %{
       ui_path: ui_path,
       suggestion: suggestion,
-      edit_msg_id: "",
       presets: presets,
       sel_preset: sel_preset
     }
