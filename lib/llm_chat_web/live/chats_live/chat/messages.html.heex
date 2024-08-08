@@ -7,7 +7,7 @@
     edit_msg_id={@uistate.edit_msg_id}
   />
 <% end %>
-<%= if @uistate.streaming do %>
+<%= if get_in(@uistate, [:streaming]) do %>
   <.message
     id="current-request"
     message={@uistate.streaming.user}

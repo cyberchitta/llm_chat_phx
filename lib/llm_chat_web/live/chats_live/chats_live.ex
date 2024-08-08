@@ -313,7 +313,7 @@ defmodule LlmChatWeb.ChatsLive do
 
   defp streamer_cancel(socket) do
     main = socket.assigns.main
-    streaming = main.uistate.streaming
+    streaming = get_in(main.uistate, [:streaming])
 
     if streaming && streaming.cancel_pid do
       LlmChat.Llm.Chat.cancel_stream(streaming.cancel_pid)

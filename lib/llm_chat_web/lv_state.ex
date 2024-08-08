@@ -38,7 +38,6 @@ defmodule LlmChatWeb.LvState do
 
   defp uistate(ui_path, suggestion, presets, sel_preset) do
     %{
-      streaming: nil,
       ui_path: ui_path,
       suggestion: suggestion,
       edit_msg_id: "",
@@ -54,7 +53,11 @@ defmodule LlmChatWeb.LvState do
   end
 
   def with_streaming(main, streaming \\ nil) do
-    %{main | uistate: %{main.uistate | streaming: streaming}}
+    if is_nil(streaming) do
+      %{main | uistate: main.uistate |> Map.delete(:streaming)}
+    else
+      %{main | uistate: main.uistate |> Map.put(:streaming, streaming)}
+    end
   end
 
   def with_cancel_pid(main, pid \\ nil) do

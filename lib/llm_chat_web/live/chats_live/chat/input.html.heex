@@ -100,16 +100,16 @@
                   <.icon name="hero-microphone" class="w-6 h-6" />
                 </button>
                 <button
-                  type={if @main.uistate.streaming, do: "button", else: "submit"}
+                  type={if get_in(@main.uistate, [:streaming]), do: "button", else: "submit"}
                   class="mb-1 me-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white transition-colors hover:opacity-70 focus-visible:outline-none focus-visible:outline-primary disabled:bg-base-content/30 disabled:text-base-content/10 disabled:hover:opacity-100 dark:bg-white dark:text-black dark:focus-visible:outline-white disabled:dark:bg-base-content/30 dark:disabled:text-base-content/10"
                   data-testid={
-                    if @main.uistate.streaming, do: "cancel-button", else: "send-button"
+                    if get_in(@main.uistate, [:streaming]), do: "cancel-button", else: "send-button"
                   }
-                  phx-click={if @main.uistate.streaming, do: "cancel", else: ""}
+                  phx-click={if get_in(@main.uistate, [:streaming]), do: "cancel", else: ""}
                 >
                   <span data-state="closed">
                     <.icon
-                      name={if @main.uistate.streaming, do: "hero-stop", else: "hero-arrow-up"}
+                      name={if get_in(@main.uistate, [:streaming]), do: "hero-stop", else: "hero-arrow-up"}
                       class="w-6 h-6"
                     />
                   </span>
