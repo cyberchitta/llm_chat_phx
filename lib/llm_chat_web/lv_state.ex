@@ -5,7 +5,7 @@ defmodule LlmChatWeb.LvState do
   def index(user_email) do
     suggestions = Suggestion.get_default()
     suggestion = Enum.random(suggestions)
-    index(user_email, %{suggestions: suggestions, uistate: uistate(nil, suggestion)})
+    index(user_email, %{suggestions: suggestions, uistate: uistate(suggestion)})
   end
 
   def index(user_email, chat_id) when is_binary(chat_id) do
@@ -23,22 +23,21 @@ defmodule LlmChatWeb.LvState do
 
   def index(user_email, chat_id, ui_path) when is_binary(chat_id) do
     main = Chat.details(chat_id, ui_path)
-    index(user_email, main |> Map.put(:uistate, uistate(ui_path, "")))
+    index(user_email, main |> Map.put(:uistate, uistate("")))
   end
 
   def sidebar(user_email) do
     if is_nil(user_email), do: %{periods: []}, else: %{periods: Chat.list_by_period(user_email)}
   end
 
-  defp uistate(ui_path, suggestion) do
+  defp uistate(suggestion) do
     presets = LlmPreset.list()
     default_preset = LlmPreset.default()
-    uistate(ui_path, suggestion, presets, default_preset)
+    uistate(suggestion, presets, default_preset)
   end
 
-  defp uistate(ui_path, suggestion, presets, sel_preset) do
+  defp uistate(suggestion, presets, sel_preset) do
     %{
-      ui_path: ui_path,
       suggestion: suggestion,
       presets: presets,
       sel_preset: sel_preset
