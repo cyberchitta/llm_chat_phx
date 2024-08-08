@@ -56,7 +56,7 @@ defmodule LlmChat.Contexts.Chat do
 
   def details(chat_id, ui_path) do
     %{
-      chat: Chat |> get(chat_id) |> with_preset(),
+      chat: Chat |> get(chat_id) |> LlmPreset.with_preset(),
       messages:
         chat_id
         |> Message.get_ui_thread(ui_path)
@@ -70,12 +70,5 @@ defmodule LlmChat.Contexts.Chat do
       set: [max_turn_number: fragment("GREATEST(max_turn_number, ?)", ^turn_number)]
     )
     |> update_all([])
-  end
-
-  def with_preset(chat) do
-    case chat do
-      nil -> nil
-      chat -> chat |> Map.put(:preset, LlmPreset.get(chat.preset_name))
-    end
   end
 end

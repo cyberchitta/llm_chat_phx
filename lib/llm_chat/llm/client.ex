@@ -14,7 +14,7 @@ defmodule LlmChat.Llm.Client do
       model: preset.model,
       messages: messages,
       temperature: preset.settings["temperature"] || 0.7
-    } |> IO.inspect()
+    }
     |> OpenaiEx.Chat.Completions.new()
   end
 end

@@ -5,7 +5,7 @@ defmodule LlmChatWeb.ChatsLive do
 
   import LlmChatWeb.Live.ChatsLive.Html
 
-  alias LlmChat.Contexts.{Chat, Message, Conversation, Feedback}
+  alias LlmChat.Contexts.{Chat, Message, LlmPreset, Conversation, Feedback}
   alias LlmChat.Files
   alias LlmChatWeb.UiState
 
@@ -146,8 +146,13 @@ defmodule LlmChatWeb.ChatsLive do
   end
 
   def preset_dd(%{"preset_name" => preset_name}, socket) do
-    {:noreply,
-     assign(socket, :main, socket.assigns.main |> UiState.with_selected_preset(preset_name))}
+    main = socket.assigns.main
+    chat = main.chat
+
+    upd_main =
+      if chat, do: %{main | chat: LlmPreset.update_preset!(chat.id, preset_name)}, else: main
+
+    {:noreply, assign(socket, :main, upd_main |> UiState.with_selected_preset(preset_name))}
   end
 
   defp chat_validate(_, socket) do

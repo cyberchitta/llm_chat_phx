@@ -1,4 +1,8 @@
 defmodule LlmChat.Contexts.LlmPreset do
+  @moduledoc false
+  import LlmChat.RepoPostgres
+  alias LlmChat.Schemas.Chat
+
   @presets [
     %{
       name: "gpt4o",
@@ -10,7 +14,6 @@ defmodule LlmChat.Contexts.LlmPreset do
       settings: %{
         "display_name" => "GPT-4o",
         "system_prompt" => "You are a helpful assistant.",
-        "max_tokens" => 2000,
         "temperature" => 0.7
       }
     },
@@ -24,7 +27,6 @@ defmodule LlmChat.Contexts.LlmPreset do
       settings: %{
         "display_name" => "GPT-4o mini",
         "system_prompt" => "You are a friendly AI assistant.",
-        "max_tokens" => 1000,
         "temperature" => 0.9
       }
     }
@@ -40,5 +42,20 @@ defmodule LlmChat.Contexts.LlmPreset do
 
   def default() do
     get("gpt-4o-mini")
+  end
+
+  def with_preset(chat) do
+    case chat do
+      nil -> nil
+      chat -> chat |> Map.put(:preset, get(chat.preset_name))
+    end
+  end
+
+  def update_preset!(chat_id, preset_name) do
+    Chat
+    |> get!(chat_id)
+    |> Chat.changeset(%{preset_name: preset_name})
+    |> update!()
+    |> with_preset()
   end
 end
