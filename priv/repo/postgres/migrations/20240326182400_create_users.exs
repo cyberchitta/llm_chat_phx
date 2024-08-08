@@ -3,7 +3,7 @@ defmodule LlmChat.Repo.Postgres.Migrations.CreateUsers do
 
   def change do
     create table(:users, primary_key: false) do
-      add(:id, :uuid, primary_key: true, default: Ecto.UUID.generate())
+      add(:id, :binary_id, primary_key: true)
       add(:google_id, :string, null: false)
       add(:email, :string, null: false)
       add(:name, :string, null: false)
