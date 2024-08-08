@@ -8,6 +8,7 @@ defmodule LlmChat.Schemas.Chat do
   schema "chats" do
     field(:name, :string)
     field(:ui_path, :string)
+    field(:preset_name, :string)
     field(:max_turn_number, :integer, default: 0)
 
     belongs_to(:user, LlmChat.Schemas.User, foreign_key: :user_id, type: Ecto.UUID)
@@ -18,8 +19,8 @@ defmodule LlmChat.Schemas.Chat do
 
   def changeset(chat, attrs) do
     chat
-    |> cast(attrs, [:name, :user_id, :ui_path, :max_turn_number])
-    |> validate_required([:name, :user_id])
+    |> cast(attrs, [:name, :user_id, :ui_path, :preset_name, :max_turn_number])
+    |> validate_required([:name, :user_id, :preset_name])
     |> assoc_constraint(:user)
   end
 end

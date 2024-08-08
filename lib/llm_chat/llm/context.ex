@@ -7,9 +7,9 @@ defmodule LlmChat.Llm.Context do
   @supported_image_types ["image/jpeg", "image/png", "image/gif", "image/webp"]
   @supported_text_types ["text/plain", "text/markdown"]
 
-  def create_messages(prompt, attachments) do
+  def create_messages(prompt, attachments, preset) do
     [
-      ChatMessage.system("You are an AI assistant."),
+      ChatMessage.system(preset.settings["system_prompt"]),
       create_user_message(prompt, attachments)
     ]
   end

@@ -21,7 +21,7 @@
       <% end %>
       <.preset-selector
         selected_preset={
-          @main.uistate.presets |> Enum.find(&(&1.name == @main.uistate.sel_preset_name))
+          if get_in(@main, [:chat]), do: @main.chat.preset, else: @main.uistate.sel_preset
         }
         presets={@main.uistate.presets}
       />

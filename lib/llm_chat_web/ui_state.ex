@@ -1,6 +1,6 @@
 defmodule LlmChatWeb.UiState do
   @moduledoc false
-  alias LlmChat.Contexts.{Chat, Conversation, User, Suggestion}
+  alias LlmChat.Contexts.{Chat, Conversation, LlmPreset, User, Suggestion}
 
   def index(user_email) do
     suggestions = Suggestion.get_default()
@@ -31,19 +31,19 @@ defmodule LlmChatWeb.UiState do
   end
 
   defp uistate(ui_path, suggestion) do
-    presets = LlmChat.Contexts.LlmPreset.list()
-    default_preset = List.first(presets)
-    uistate(ui_path, suggestion, presets, default_preset.name)
+    presets = LlmPreset.list()
+    default_preset = LlmPreset.default()
+    uistate(ui_path, suggestion, presets, default_preset)
   end
 
-  defp uistate(ui_path, suggestion, presets, sel_preset_name) do
+  defp uistate(ui_path, suggestion, presets, sel_preset) do
     %{
       streaming: nil,
       ui_path: ui_path,
       suggestion: suggestion,
       edit_msg_id: "",
       presets: presets,
-      sel_preset_name: sel_preset_name
+      sel_preset: sel_preset
     }
   end
 
@@ -69,8 +69,8 @@ defmodule LlmChatWeb.UiState do
     %{main | uistate: %{main.uistate | presets: presets}}
   end
 
-  def with_selected_preset(main, name) do
-    %{main | uistate: %{main.uistate | sel_preset_name: name}}
+  def with_selected_preset(main, preset) do
+    %{main | uistate: %{main.uistate | sel_preset: preset}}
   end
 
   def with_ui_path(main, ui_path) do

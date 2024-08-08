@@ -164,7 +164,8 @@ defmodule LlmChatWeb.ChatsLive do
 
   defp chat_submit_new(prompt, socket) do
     user = socket.assigns.user
-    chat = Chat.create(%{name: "NewChat", user_id: user.id})
+    preset = socket.assigns.main.uistate.sel_preset
+    chat = Chat.create(%{name: "NewChat", user_id: user.id, preset_name: preset.name})
     {:noreply, socket |> push_navigate(to: ~p"/chats/#{chat.id}?prompt=#{URI.encode(prompt)}")}
   end
 
@@ -172,9 +173,10 @@ defmodule LlmChatWeb.ChatsLive do
     main = socket.assigns.main
     streaming = chat_stream_state(main, prompt, attachments)
     liveview_pid = self()
+    preset = main.chat.preset
 
     Task.Supervisor.start_child(LlmChat.TaskSupervisor, fn ->
-      stream = LlmChat.Llm.Chat.initiate_stream(prompt, attachments)
+      stream = LlmChat.Llm.Chat.initiate_stream(prompt, attachments, preset)
       send(liveview_pid, {:cancel_pid, stream.task_pid})
       LlmChat.Llm.Chat.process_stream(liveview_pid, stream)
     end)
