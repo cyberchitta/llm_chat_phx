@@ -7,22 +7,22 @@ defmodule LlmChatWeb.ChatsLive do
 
   alias LlmChat.Contexts.{Chat, Message, LlmPreset, Conversation, Feedback}
   alias LlmChat.Files
-  alias LlmChatWeb.UiState
+  alias LlmChatWeb.LvState
 
   def mount(%{"id" => chat_id}, %{"user_email" => user_email}, socket) do
     {:ok,
      socket
-     |> assign(UiState.index(user_email, chat_id))
+     |> assign(LvState.index(user_email, chat_id))
      |> enable_attachments()
      |> enable_gauth()}
   end
 
   def mount(_params, %{"user_email" => user_email}, socket) do
-    {:ok, socket |> assign(UiState.index(user_email)) |> enable_gauth()}
+    {:ok, socket |> assign(LvState.index(user_email)) |> enable_gauth()}
   end
 
   def mount(_params, _session, socket) do
-    {:ok, socket |> assign(UiState.index(nil)) |> enable_gauth()}
+    {:ok, socket |> assign(LvState.index(nil)) |> enable_gauth()}
   end
 
   def handle_params(%{"id" => chat_id, "prompt" => prompt}, _uri, socket) do
@@ -152,7 +152,7 @@ defmodule LlmChatWeb.ChatsLive do
     upd_main =
       if chat, do: %{main | chat: LlmPreset.update_preset!(chat.id, preset_name)}, else: main
 
-    {:noreply, assign(socket, :main, upd_main |> UiState.with_selected_preset(preset_name))}
+    {:noreply, assign(socket, :main, upd_main |> LvState.with_selected_preset(preset_name))}
   end
 
   defp chat_validate(_, socket) do
@@ -186,7 +186,7 @@ defmodule LlmChatWeb.ChatsLive do
       LlmChat.Llm.Chat.process_stream(liveview_pid, stream)
     end)
 
-    {:noreply, socket |> assign(main: main |> UiState.with_streaming(streaming))}
+    {:noreply, socket |> assign(main: main |> LvState.with_streaming(streaming))}
   end
 
   defp chat_stream_state(main, prompt, attachments) do
@@ -227,11 +227,11 @@ defmodule LlmChatWeb.ChatsLive do
   end
 
   defp useredit_begin(%{"id" => message_id}, socket) do
-    {:noreply, assign(socket, main: UiState.with_edit(socket.assigns.main, message_id))}
+    {:noreply, assign(socket, main: LvState.with_edit(socket.assigns.main, message_id))}
   end
 
   defp useredit_cancel(socket) do
-    {:noreply, assign(socket, main: UiState.with_edit(socket.assigns.main, ""))}
+    {:noreply, assign(socket, main: LvState.with_edit(socket.assigns.main, ""))}
   end
 
   defp useredit_save(%{"edit-textarea" => content}, socket) do
@@ -239,7 +239,7 @@ defmodule LlmChatWeb.ChatsLive do
     message_id = main.uistate.edit_msg_id
     message = Enum.find(main.messages, &(&1.id == message_id))
     parent_path = Conversation.parent_path(message.path)
-    updated_main = main |> UiState.with_ui_path(parent_path)
+    updated_main = main |> LvState.with_ui_path(parent_path)
     attachments = message.attachments
     upd_socket = socket |> assign(main: updated_main)
     {attachments, upd_socket} |> chat_submit(content)
@@ -308,7 +308,7 @@ defmodule LlmChatWeb.ChatsLive do
 
     sibling_id = Enum.at(sibling_info.sibling_ids, sib_idx - 1)
     path = Conversation.get_leftmost_path(main.chat.id, sibling_id)
-    {:noreply, assign(socket, main: main |> UiState.with_ui_path(path))}
+    {:noreply, assign(socket, main: main |> LvState.with_ui_path(path))}
   end
 
   defp streamer_cancel(socket) do
@@ -317,7 +317,7 @@ defmodule LlmChatWeb.ChatsLive do
 
     if streaming && streaming.cancel_pid do
       LlmChat.Llm.Chat.cancel_stream(streaming.cancel_pid)
-      {:noreply, assign(socket, main: main |> UiState.with_streaming())}
+      {:noreply, assign(socket, main: main |> LvState.with_streaming())}
     else
       {:noreply, socket}
     end
@@ -325,13 +325,13 @@ defmodule LlmChatWeb.ChatsLive do
 
   defp streamer_with_cancel_pid(pid, socket) do
     main = socket.assigns.main
-    {:noreply, assign(socket, main: main |> UiState.with_cancel_pid(pid))}
+    {:noreply, assign(socket, main: main |> LvState.with_cancel_pid(pid))}
   end
 
   defp streamer_next_chunk(chunk, socket) do
     main = socket.assigns.main
-    streaming = main.uistate.streaming |> UiState.with_chunk(chunk)
-    {:noreply, assign(socket, main: main |> UiState.with_streaming(streaming))}
+    streaming = main.uistate.streaming |> LvState.with_chunk(chunk)
+    {:noreply, assign(socket, main: main |> LvState.with_streaming(streaming))}
   end
 
   defp streamer_end_of_stream(socket) do
@@ -346,7 +346,7 @@ defmodule LlmChatWeb.ChatsLive do
     Conversation.update_current_path!(user.chat_id, asst_msg.path)
     next_messages = main.messages ++ [user_msg, asst_msg]
     next_main = %{main | messages: next_messages}
-    {:noreply, assign(socket, main: next_main |> UiState.with_streaming())}
+    {:noreply, assign(socket, main: next_main |> LvState.with_streaming())}
   end
 
   defp sidebar_toggle(socket) do
@@ -363,7 +363,7 @@ defmodule LlmChatWeb.ChatsLive do
 
   defp sidebar_rename_chat(%{"id" => chat_id, "new_name" => new_name}, socket) do
     Chat.rename(chat_id, new_name)
-    {:noreply, assign(socket, :sidebar, UiState.sidebar(socket.assigns.user_email))}
+    {:noreply, assign(socket, :sidebar, LvState.sidebar(socket.assigns.user_email))}
   end
 
   defp sidebar_delete_chat(%{"id" => chat_id}, socket) do
@@ -373,7 +373,7 @@ defmodule LlmChatWeb.ChatsLive do
     if !is_nil(chat) && chat.id == chat_id do
       {:noreply, socket |> push_navigate(to: ~p"/chats")}
     else
-      {:noreply, assign(socket, :sidebar, UiState.sidebar(socket.assigns.user_email))}
+      {:noreply, assign(socket, :sidebar, LvState.sidebar(socket.assigns.user_email))}
     end
   end
 

@@ -1,4 +1,4 @@
-defmodule LlmChatWeb.UiState do
+defmodule LlmChatWeb.LvState do
   @moduledoc false
   alias LlmChat.Contexts.{Chat, Conversation, LlmPreset, User, Suggestion}
 
