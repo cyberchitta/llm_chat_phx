@@ -1,4 +1,5 @@
 defmodule LlmChat.Contexts.Feedback do
+  @moduledoc false
   import Ecto.Query
   import LlmChat.RepoPostgres
   alias LlmChat.Schemas.Feedback

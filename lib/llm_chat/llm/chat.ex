@@ -1,4 +1,5 @@
 defmodule LlmChat.Llm.Chat do
+  @moduledoc false
   alias LlmChat.Llm.{Context, Client, Streamer}
 
   def initiate_stream(prompt, attachments, preset) do

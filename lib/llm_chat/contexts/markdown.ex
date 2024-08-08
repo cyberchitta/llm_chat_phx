@@ -1,4 +1,5 @@
 defmodule LlmChat.Contexts.Markdown do
+  @moduledoc false
   def to_html(markdown) do
     options = %Earmark.Options{code_class_prefix: "language-", smartypants: false, breaks: true}
     to_html(markdown, options) |> add_tailwind_classes()
