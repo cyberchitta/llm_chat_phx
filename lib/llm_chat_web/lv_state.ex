@@ -59,7 +59,7 @@ defmodule LlmChatWeb.LvState do
     end
   end
 
-  def with_cancel_pid(main, pid \\ nil) do
+  def with_cancel_pid(main, pid) do
     %{main | uistate: %{main.uistate | streaming: %{main.uistate.streaming | cancel_pid: pid}}}
   end
 
@@ -69,10 +69,6 @@ defmodule LlmChatWeb.LvState do
     else
       %{main | uistate: main.uistate |> Map.put(:edit_msg_id, edit_msg_id)}
     end
-  end
-
-  def with_presets(main, presets) do
-    %{main | uistate: %{main.uistate | presets: presets}}
   end
 
   def with_selected_preset(main, preset) do
