@@ -4,7 +4,7 @@
     message={message}
     is_streamed={false}
     sibling_info={message.sibling_info}
-    edit_msg_id={@uistate.edit_msg_id}
+    edit_msg_id={if get_in(@uistate, [:edit_msg_id]), do: @uistate.edit_msg_id, else: ""}
   />
 <% end %>
 <%= if get_in(@uistate, [:streaming]) do %>
@@ -12,12 +12,12 @@
     id="current-request"
     message={@uistate.streaming.user}
     is_streamed={false}
-    edit_msg_id={@uistate.edit_msg_id}
+    edit_msg_id={if get_in(@uistate, [:edit_msg_id]), do: @uistate.edit_msg_id, else: ""}
   />
   <.message
     id="current-response"
     message={@uistate.streaming.assistant}
     is_streamed={true}
-    edit_msg_id={@uistate.edit_msg_id}
+    edit_msg_id={if get_in(@uistate, [:edit_msg_id]), do: @uistate.edit_msg_id, else: ""}
   />
 <% end %>

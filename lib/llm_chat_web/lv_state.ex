@@ -64,8 +64,12 @@ defmodule LlmChatWeb.LvState do
     %{main | uistate: %{main.uistate | streaming: %{main.uistate.streaming | cancel_pid: pid}}}
   end
 
-  def with_edit(main, edit_msg_id) do
-    %{main | uistate: %{main.uistate | edit_msg_id: edit_msg_id}}
+  def with_edit(main, edit_msg_id \\ "") do
+    if edit_msg_id == "" do
+      %{main | uistate: main.uistate |> Map.delete(:edit_msg_id)}
+    else
+      %{main | uistate: main.uistate |> Map.put(:edit_msg_id, edit_msg_id)}
+    end
   end
 
   def with_presets(main, presets) do

@@ -231,7 +231,7 @@ defmodule LlmChatWeb.ChatsLive do
   end
 
   defp useredit_cancel(socket) do
-    {:noreply, assign(socket, main: LvState.with_edit(socket.assigns.main, ""))}
+    {:noreply, assign(socket, main: LvState.with_edit(socket.assigns.main))}
   end
 
   defp useredit_save(%{"edit-textarea" => content}, socket) do
