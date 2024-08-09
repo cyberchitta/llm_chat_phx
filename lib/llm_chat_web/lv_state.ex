@@ -48,6 +48,10 @@ defmodule LlmChatWeb.LvState do
     %{}
   end
 
+  def finish_streaming(main) do
+    main |> with_api_call() |> with_streaming() |> with_edit()
+  end
+
   def with_chunk(streaming, chunk) do
     assistant = streaming.assistant
     content = assistant.content

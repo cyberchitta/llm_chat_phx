@@ -355,13 +355,12 @@ defmodule LlmChatWeb.ChatsLive do
     with %{uistate: %{streaming: streaming}, lvstate: %{api_call: api_call}} = main <-
            socket.assigns.main do
       {user_msg, asst_msg} = Chat.add_exchange!(streaming.user, streaming.assistant)
-      upd_api_call = api_call |> ChatApiCall.for_response(asst_msg.id) |> ChatApiCall.finish()
-      ChatApiCall.create!(upd_api_call)
-      next_messages = main.messages ++ [user_msg, asst_msg]
-      next_main = main |> LvState.with_api_call() |> LvState.with_streaming()
-      {:noreply, assign(socket, main: %{next_main | messages: next_messages})}
+      api_call |> ChatApiCall.finish(asst_msg.id) |> ChatApiCall.create!()
+      messages = main.messages ++ [user_msg, asst_msg]
+      upd_main = main |> LvState.finish_streaming()
+      {:noreply, assign(socket, main: %{upd_main | messages: messages})}
     else
-      _ -> {:noreply, assign(socket, main: socket.assigns.main |> LvState.with_streaming())}
+      _ -> {:noreply, assign(socket, main: socket.assigns.main |> LvState.finish_streaming())}
     end
   end
 
