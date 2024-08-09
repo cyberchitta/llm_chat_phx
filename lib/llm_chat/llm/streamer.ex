@@ -8,7 +8,7 @@ defmodule LlmChat.Llm.Streamer do
     base_stream
     |> Stream.flat_map(& &1)
     |> Stream.map(fn %{data: data} ->
-      case data |> IO.inspect() do
+      case data do
         %{"usage" => usage} when not is_nil(usage) ->
           %{usage: usage}
 
