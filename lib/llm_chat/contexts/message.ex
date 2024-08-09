@@ -55,6 +55,10 @@ defmodule LlmChat.Contexts.Message do
     %{id: nil, chat_id: chat_id, parent_id: parent_id, turn_number: turn_number}
   end
 
+  def with_sibling_info(msg, chat_id) do
+    msg |> Map.put(:sibling_info, get_sibling_info(chat_id, msg))
+  end
+
   def with_content(msg, content \\ "", attachments \\ []) do
     msg |> Map.put(:content, content) |> Map.put(:attachments, attachments)
   end

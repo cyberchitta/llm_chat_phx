@@ -60,7 +60,7 @@ defmodule LlmChat.Contexts.Chat do
       messages:
         chat_id
         |> Message.get_ui_thread(ui_path)
-        |> Enum.map(&Map.put(&1, :sibling_info, Message.get_sibling_info(chat_id, &1)))
+        |> Enum.map(&Message.with_sibling_info(&1, chat_id))
     }
   end
 
@@ -73,10 +73,13 @@ defmodule LlmChat.Contexts.Chat do
   end
 
   def add_exchange!(user, asst) do
+    chat_id = user.chat_id
     user_msg = user |> Message.add_message!()
     asst_msg = asst |> Map.put(:parent_id, user_msg.id) |> Message.add_message!()
-    update_max_turn_number!(user.chat_id, asst.turn_number)
-    Conversation.update_current_path!(user.chat_id, asst_msg.path)
-    {user_msg, asst_msg}
+    update_max_turn_number!(chat_id, asst.turn_number)
+    Conversation.update_current_path!(chat_id, asst_msg.path)
+
+    {user_msg |> Message.with_sibling_info(chat_id),
+     asst_msg |> Message.with_sibling_info(chat_id)}
   end
 end
