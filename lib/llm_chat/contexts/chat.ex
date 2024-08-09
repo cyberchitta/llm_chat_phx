@@ -2,7 +2,7 @@ defmodule LlmChat.Contexts.Chat do
   @moduledoc false
   import Ecto.Query
   import LlmChat.RepoPostgres
-  alias LlmChat.Contexts.{Message, LlmPreset}
+  alias LlmChat.Contexts.{Message, LlmPreset, Conversation}
   alias LlmChat.Schemas.{Chat, User}
 
   def list_by_period(user_email) do
@@ -70,5 +70,13 @@ defmodule LlmChat.Contexts.Chat do
       set: [max_turn_number: fragment("GREATEST(max_turn_number, ?)", ^turn_number)]
     )
     |> update_all([])
+  end
+
+  def add_exchange!(user, asst) do
+    user_msg = user |> Message.add_message!()
+    asst_msg = asst |> Map.put(:parent_id, user_msg.id) |> Message.add_message!()
+    update_max_turn_number!(user.chat_id, asst.turn_number)
+    Conversation.update_current_path!(user.chat_id, asst_msg.path)
+    {user_msg, asst_msg}
   end
 end

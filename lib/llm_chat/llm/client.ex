@@ -11,6 +11,7 @@ defmodule LlmChat.Llm.Client do
 
   defp chat_request(messages, preset) do
     %{
+      stream_options: %{include_usage: true},
       model: preset.model,
       messages: messages,
       temperature: preset.settings["temperature"] || 0.7

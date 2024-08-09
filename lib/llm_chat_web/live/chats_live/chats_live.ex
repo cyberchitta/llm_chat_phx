@@ -5,7 +5,7 @@ defmodule LlmChatWeb.ChatsLive do
 
   import LlmChatWeb.Live.ChatsLive.Html
 
-  alias LlmChat.Contexts.{Chat, Message, LlmPreset, Conversation, Feedback}
+  alias LlmChat.Contexts.{Chat, Message, LlmPreset, Conversation, Feedback, ChatApiCall}
   alias LlmChat.Files
   alias LlmChatWeb.LvState
 
@@ -106,6 +106,10 @@ defmodule LlmChatWeb.ChatsLive do
     streamer_next_chunk(chunk, socket)
   end
 
+  def handle_info({:token_usage, usage}, socket) do
+    streamer_token_usage(usage, socket)
+  end
+
   def handle_info(:end_of_stream, socket) do
     streamer_end_of_stream(socket)
   end
@@ -179,6 +183,7 @@ defmodule LlmChatWeb.ChatsLive do
     streaming = chat_stream_state(main, prompt, attachments)
     liveview_pid = self()
     preset = main.chat.preset
+    api_call = ChatApiCall.start(preset.name, [], [])
 
     Task.Supervisor.start_child(LlmChat.TaskSupervisor, fn ->
       stream = LlmChat.Llm.Chat.initiate_stream(prompt, attachments, preset)
@@ -186,7 +191,8 @@ defmodule LlmChatWeb.ChatsLive do
       LlmChat.Llm.Chat.process_stream(liveview_pid, stream)
     end)
 
-    {:noreply, socket |> assign(main: main |> LvState.with_streaming(streaming))}
+    upd_main = main |> LvState.with_streaming(streaming) |> LvState.with_api_call(api_call)
+    {:noreply, socket |> assign(main: upd_main)}
   end
 
   defp chat_stream_state(main, prompt, attachments) do
@@ -334,19 +340,26 @@ defmodule LlmChatWeb.ChatsLive do
     {:noreply, assign(socket, main: main |> LvState.with_streaming(streaming))}
   end
 
-  defp streamer_end_of_stream(socket) do
+  defp streamer_token_usage(usage, socket) do
     main = socket.assigns.main
-    streaming = main.uistate.streaming
-    user = streaming.user
-    asst = streaming.assistant
+    api_call = main.lvstate.api_call
+    input = usage |> Map.get("prompt_tokens")
+    output = usage |> Map.get("completion_tokens")
+    total = usage |> Map.get("total_tokens")
+    upd_api_call = api_call |> ChatApiCall.with_token_counts(input, output, total)
+    {:noreply, assign(socket, main: main |> LvState.with_api_call(upd_api_call))}
+  end
 
-    user_msg = Message.add_message!(user)
-    asst_msg = Message.add_message!(asst |> Map.put(:parent_id, user_msg.id))
-    Chat.update_max_turn_number!(user.chat_id, asst_msg.turn_number)
-    Conversation.update_current_path!(user.chat_id, asst_msg.path)
-    next_messages = main.messages ++ [user_msg, asst_msg]
-    next_main = %{main | messages: next_messages}
-    {:noreply, assign(socket, main: next_main |> LvState.with_streaming())}
+  defp streamer_end_of_stream(socket) do
+    with %{uistate: %{streaming: streaming}, lvstate: %{api_call: api_call}} = main <-
+           socket.assigns.main do
+      {user_msg, asst_msg} = Chat.add_exchange!(streaming.user, streaming.assistant)
+      upd_api_call = api_call |> ChatApiCall.for_response(asst_msg.id) |> ChatApiCall.finish()
+      ChatApiCall.create!(upd_api_call)
+      next_messages = main.messages ++ [user_msg, asst_msg]
+      next_main = main |> LvState.with_api_call() |> LvState.with_streaming()
+      {:noreply, assign(socket, main: %{next_main | messages: next_messages})}
+    end
   end
 
   defp sidebar_toggle(socket) do

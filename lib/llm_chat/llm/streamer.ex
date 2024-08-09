@@ -1,19 +1,34 @@
 defmodule LlmChat.Llm.Streamer do
   @moduledoc false
   def process_stream(receiver, stream) do
-    stream.body_stream |> content_stream() |> send_chunks(receiver)
+    stream.body_stream |> data_stream() |> send_chunks(receiver)
   end
 
-  defp content_stream(base_stream) do
+  defp data_stream(base_stream) do
     base_stream
     |> Stream.flat_map(& &1)
-    |> Stream.map(fn %{data: d} -> d |> Map.get("choices") |> List.first() |> Map.get("delta") end)
-    |> Stream.filter(fn map -> map |> Map.has_key?("content") end)
-    |> Stream.map(fn map -> map |> Map.get("content") end)
+    |> Stream.map(fn %{data: data} ->
+      case data |> IO.inspect() do
+        %{"usage" => usage} when not is_nil(usage) ->
+          %{usage: usage}
+
+        %{"choices" => choices} when choices != [] ->
+          case List.first(choices) do
+            %{"delta" => %{}, "finish_reason" => "stop"} -> %{}
+            %{"delta" => delta} -> %{content: delta |> Map.get("content")}
+          end
+      end
+    end)
+    |> Stream.reject(fn map -> map_size(map) == 0 end)
   end
 
-  defp send_chunks(content_stream, receiver) do
-    content_stream |> Enum.each(fn chunk -> send(receiver, {:next_chunk, chunk}) end)
+  defp send_chunks(data_stream, receiver) do
+    data_stream
+    |> Enum.each(fn
+      %{content: content} -> send(receiver, {:next_chunk, content})
+      %{usage: usage} -> send(receiver, {:token_usage, usage})
+    end)
+
     send(receiver, :end_of_stream)
   end
 end

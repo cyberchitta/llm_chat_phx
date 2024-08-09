@@ -14,7 +14,7 @@ defmodule LlmChatWeb.LvState do
 
   def index(user_email, %{} = main) do
     %{
-      main: main,
+      main: main |> Map.put(:lvstate, lvstate()),
       sidebar: sidebar(user_email),
       sidebar_open: true,
       user: User.get_by_email(user_email)
@@ -42,6 +42,10 @@ defmodule LlmChatWeb.LvState do
       presets: presets,
       sel_preset: sel_preset
     }
+  end
+
+  defp lvstate() do
+    %{}
   end
 
   def with_chunk(streaming, chunk) do
@@ -76,5 +80,13 @@ defmodule LlmChatWeb.LvState do
 
   def with_ui_path(main, ui_path) do
     main |> Map.merge(Chat.details(main.chat.id, ui_path))
+  end
+
+  def with_api_call(main, api_call \\ nil) do
+    if is_nil(api_call) do
+      %{main | lvstate: main.lvstate |> Map.delete(:api_call)}
+    else
+      %{main | lvstate: main.lvstate |> Map.put(:api_call, api_call)}
+    end
   end
 end
