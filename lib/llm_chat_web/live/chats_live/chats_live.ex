@@ -323,7 +323,8 @@ defmodule LlmChatWeb.ChatsLive do
 
     if streaming && streaming.cancel_pid do
       LlmChat.Llm.Chat.cancel_stream(streaming.cancel_pid)
-      {:noreply, assign(socket, main: main |> LvState.with_streaming())}
+      upd_main = main |> LvState.with_api_call() |> LvState.with_streaming()
+      {:noreply, assign(socket, main: upd_main)}
     else
       {:noreply, socket}
     end
@@ -359,6 +360,8 @@ defmodule LlmChatWeb.ChatsLive do
       next_messages = main.messages ++ [user_msg, asst_msg]
       next_main = main |> LvState.with_api_call() |> LvState.with_streaming()
       {:noreply, assign(socket, main: %{next_main | messages: next_messages})}
+    else
+      _ -> {:noreply, assign(socket, main: socket.assigns.main |> LvState.with_streaming())}
     end
   end
 
