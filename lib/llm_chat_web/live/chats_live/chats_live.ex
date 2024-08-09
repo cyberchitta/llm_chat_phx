@@ -342,13 +342,12 @@ defmodule LlmChatWeb.ChatsLive do
   end
 
   defp streamer_token_usage(usage, socket) do
-    main = socket.assigns.main
-    api_call = main.lvstate.api_call
-    input = usage |> Map.get("prompt_tokens")
-    output = usage |> Map.get("completion_tokens")
-    total = usage |> Map.get("total_tokens")
-    upd_api_call = api_call |> ChatApiCall.with_token_counts(input, output, total)
-    {:noreply, assign(socket, main: main |> LvState.with_api_call(upd_api_call))}
+    with %{main: main} <- socket.assigns,
+         %{lvstate: %{api_call: api_call}} <- main do
+      %{"prompt_tokens" => input, "completion_tokens" => output, "total_tokens" => total} = usage
+      upd_api_call = ChatApiCall.with_token_counts(api_call, input, output, total)
+      {:noreply, assign(socket, main: LvState.with_api_call(main, upd_api_call))}
+    end
   end
 
   defp streamer_end_of_stream(socket) do
