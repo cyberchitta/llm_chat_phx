@@ -18,3 +18,5 @@ npm-debug.log
 
 /.elixir_ls
 /.llm-context
+
+.DS_Store
