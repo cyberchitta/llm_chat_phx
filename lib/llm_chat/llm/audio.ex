@@ -39,9 +39,7 @@ defmodule LlmChat.Llm.Audio do
 
   defp mime_type_to_extension(mime_type) do
     case mime_type do
-      "audio/wav" -> ".wav"
       "audio/mpeg" -> ".mp3"
-      "audio/mp4" -> ".mp4"
       _ -> ".bin"
     end
   end
